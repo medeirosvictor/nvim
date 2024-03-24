@@ -15,7 +15,6 @@ vim.opt.cursorline = true
 vim.opt.signcolumn = "yes"
 vim.opt.winblend = 0
 
-vim.opt.autoindent = true
 vim.opt.hlsearch  = true
 vim.opt.title = true
 
@@ -43,6 +42,7 @@ vim.filetype.add({
         templ = "templ",
     },
 })
+
 local custom_format  = function()
     local bufnr = vim.api.nvim_get_current_buf()
     local filename = vim.api.nvim_buf_get_name(bufnr)
@@ -57,6 +57,7 @@ local custom_format  = function()
         end,
     })
 end
+
 local on_attach = function(client, bufnr)
     local opts = { buffer = bufnr, remap = false }
     -- other configuration options
