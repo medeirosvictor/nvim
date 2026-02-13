@@ -1,0 +1,6 @@
+require("victor.plugins")
+require("victor.core.options")
+require("victor.core.keymaps")
+require("victor.core.autocmds")
+require("victor.languages.lsp")
+require("victor.languages.treesitter")
