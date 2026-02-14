@@ -1,5 +1,8 @@
 require("victor.core.options")
-require("victor.core.keymaps")
+
+vim.defer_fn(function()
+  require("victor.core.keymaps")
+end, 0)
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
