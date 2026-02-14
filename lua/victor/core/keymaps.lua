@@ -1,6 +1,7 @@
 local keymap = vim.keymap.set
 
-keymap("n", "<C-f>", ":lua require('telescope.builtin').live_grep()<CR>", { noremap = true, silent = true, desc = "Find text in files" })
+keymap("n", "<C-f>", ":lua require('telescope.builtin').current_buffer_fuzzy_find()<CR>", { noremap = true, silent = true, desc = "Find text in buffer" })
+keymap("n", "<C-F>", ":lua require('telescope.builtin').live_grep()<CR>", { noremap = true, silent = true, desc = "Find text in files" })
 keymap("n", "<C-p>", ":lua require('telescope.builtin').find_files()<CR>", { noremap = true, silent = true, desc = "Find files" })
 keymap("n", "<C-b>", ":NvimTreeToggle<CR>", { noremap = true, silent = true, desc = "Toggle sidebar" })
 keymap("n", "<C-t>", ":ToggleTerm direction=float<CR>", { noremap = true, silent = true, desc = "Toggle terminal" })
@@ -8,7 +9,8 @@ keymap("n", "<C-t>", ":ToggleTerm direction=float<CR>", { noremap = true, silent
 keymap("n", "<leader>h", ":nohlsearch<CR>", { noremap = true, silent = true, desc = "Clear search highlight" })
 
 keymap("n", "<leader>ff", ":lua require('telescope.builtin').find_files()<CR>", { noremap = true, silent = true, desc = "Find files" })
-keymap("n", "<leader>fg", ":lua require('telescope.builtin').live_grep()<CR>", { noremap = true, silent = true, desc = "Find text" })
+keymap("n", "<leader>fg", ":lua require('telescope.builtin').live_grep()<CR>", { noremap = true, silent = true, desc = "Find text in files" })
+keymap("n", "<leader>fG", ":lua require('telescope.builtin').live_grep()<CR>", { noremap = true, silent = true, desc = "Find text in files" })
 keymap("n", "<leader>fb", ":lua require('telescope.builtin').buffers()<CR>", { noremap = true, silent = true, desc = "Find buffers" })
 keymap("n", "<leader>fh", ":lua require('telescope.builtin').help_tags()<CR>", { noremap = true, silent = true, desc = "Find help tags" })
 
