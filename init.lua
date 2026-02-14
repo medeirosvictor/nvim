@@ -17,6 +17,8 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
   { "nvim-lua/plenary.nvim" },
 
+  { "nvim-tree/nvim-web-devicons" },
+
   {
     "nvim-tree/nvim-tree.lua",
     dependencies = { "nvim-tree/nvim-web-devicons" },
@@ -28,11 +30,41 @@ require("lazy").setup({
         filters = { custom = { "^.git$" } },
         git = { enable = true, ignore = true },
         view = { width = 30, side = "left", signcolumn = "yes" },
-        renderer = { indent_width = 2, icons = { enable = true } },
+        renderer = {
+          indent_width = 2,
+          symlink_destination = false,
+          icons = {
+            show = {
+              file = true,
+              folder = true,
+              folder_arrow = true,
+              git = true,
+            },
+            glyphs = {
+              default = "󰈔",
+              symlink = "󰌋",
+              folder = {
+                default = "󰉋",
+                open = "󰷏",
+                empty = "󰉊",
+                empty_open = "󰷏",
+                symlink = "󰌋",
+                symlink_open = "󰷏",
+              },
+              git = {
+                unstaged = "󰄑",
+                staged = "󰄲",
+                untracked = "󰊠",
+                renamed = "󰁕",
+                deleted = "󰀍",
+                ignored = "�esco",
+              },
+            },
+          },
+        },
       })
     end,
   },
-  { "nvim-tree/nvim-web-devicons" },
 
   {
     "nvim-telescope/telescope.nvim",
