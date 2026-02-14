@@ -185,7 +185,7 @@ require("lazy").setup({
   {
     "folke/which-key.nvim",
     config = function()
-      require("which-key").setup({ window = { border = "single" } })
+      require("which-key").setup({ win = { border = "single" } })
     end,
   },
 
