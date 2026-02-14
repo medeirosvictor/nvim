@@ -12,7 +12,7 @@ keymap("n", "<leader>fg", ":lua require('telescope.builtin').live_grep()<CR>", {
 keymap("n", "<leader>fb", ":lua require('telescope.builtin').buffers()<CR>", { noremap = true, silent = true, desc = "Find buffers" })
 keymap("n", "<leader>fh", ":lua require('telescope.builtin').help_tags()<CR>", { noremap = true, silent = true, desc = "Find help tags" })
 
-keymap("n", "<leader>th", ":lua require('telescope').load_extension('themes').themes()<CR>", { noremap = true, silent = true, desc = "Pick theme" })
+keymap("n", "<leader>th", ":Telescope colorscheme<CR>", { noremap = true, silent = true, desc = "Pick theme" })
 
 keymap("n", "<C-j>", "<C-w>j", { noremap = true, silent = true, desc = "Move to window down" })
 keymap("n", "<C-k>", "<C-w>k", { noremap = true, silent = true, desc = "Move to window up" })
