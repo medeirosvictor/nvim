@@ -27,7 +27,7 @@ require("lazy").setup({
         filters = { custom = { "^.git$" } },
         git = { enable = true, ignore = true },
         view = { width = 30, side = "left", signcolumn = "yes" },
-        renderer = { indent_width = 2 },
+        renderer = { indent_width = 2, icons = { enable = true } },
       })
     end,
   },
