@@ -1,4 +1,5 @@
 local plugins = {
+  "https://github.com/nvim-lua/plenary.nvim",
   "https://github.com/nvim-tree/nvim-tree.lua",
   "https://github.com/nvim-tree/nvim-web-devicons",
   "https://github.com/nvim-treesitter/nvim-treesitter",
@@ -27,43 +28,20 @@ vim.pack.add(plugins)
 require("nvim-tree").setup({
   disable_netrw = true,
   hijack_netrw = true,
-  open_on_setup = false,
-  ignore_ft_on_setup = {},
   auto_close = true,
-  open_on_tab = false,
-  hijack_cursor = false,
-  update_cwd = false,
-  hijack_unnamed_buffer_when_opening = false,
   update_focused_file = { enable = true, update_cwd = false },
-  system_open = { cmd = nil },
-  diagnostics = { enable = true },
   filters = { custom = { "^.git$" } },
   git = { enable = true, ignore = true },
   view = {
     width = 30,
-    height = 30,
     side = "left",
-    preserve_window_proportions = false,
     signcolumn = "yes",
   },
   renderer = {
-    add_trailing = false,
-    group_empty = false,
-    highlight_git = true,
-    full_name = false,
     indent_width = 2,
-    special_files = { "Cargo.toml", "Makefile", "README.md", "readme.md" },
-    symlink_destination = true,
     icons = {
       web_devicons = {
-        file = {
-          enable = true,
-          color = true,
-        },
-        folder = {
-          enable = false,
-          color = true,
-        },
+        file = { enable = true, color = true },
       },
     },
   },
