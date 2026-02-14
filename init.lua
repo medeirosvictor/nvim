@@ -23,7 +23,7 @@ vim.pack.add({
   "https://github.com/folke/which-key.nvim",
   "https://github.com/mg979/vim-visual-multi",
   "https://github.com/ellisonleao/gruvbox.nvim",
-})
+}, { load = true })
 
 vim.defer_fn(function()
   require("victor.plugins")
