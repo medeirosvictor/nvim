@@ -33,3 +33,5 @@ opt.hlsearch = true
 opt.incsearch = true
 
 g.mapleader = " "
+
+opt.clipboard = "unnamedplus"
