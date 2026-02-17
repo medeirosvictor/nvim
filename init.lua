@@ -150,11 +150,11 @@ require("lazy").setup({
 
 
 
-      require("lspconfig").ts_ls.setup({ capabilities = capabilities })
-      require("lspconfig").pyright.setup({ capabilities = capabilities })
-      require("lspconfig").gopls.setup({ capabilities = capabilities })
-      require("lspconfig").clangd.setup({ capabilities = capabilities })
-      require("lspconfig").rust_analyzer.setup({ capabilities = capabilities })
+      local servers = { "ts_ls", "pyright", "gopls", "clangd", "rust_analyzer" }
+      for _, server in ipairs(servers) do
+        vim.lsp.config(server, { capabilities = capabilities })
+        vim.lsp.enable(server)
+      end
 
       vim.diagnostic.config({ virtual_text = true, signs = true, float = { border = "rounded" } })
 
