@@ -98,7 +98,7 @@ require("lazy").setup({
     "nvim-lualine/lualine.nvim",
     config = function()
       require("lualine").setup({
-        options = { theme = "gruvbox", component_separators = "|", section_separators = "", globalstatus = true },
+        options = { theme = "tokyonight", component_separators = "|", section_separators = "", globalstatus = true },
       })
     end,
   },
@@ -235,14 +235,26 @@ require("lazy").setup({
   { "mg979/vim-visual-multi" },
 
   {
-    "ellisonleao/gruvbox.nvim",
+    "folke/tokyonight.nvim",
+    priority = 1000,
     config = function()
-      vim.cmd("colorscheme gruvbox")
+      require("tokyonight").setup({
+        style = "night",
+        transparent = false,
+        terminal_colors = true,
+        styles = {
+          comments = { italic = true },
+          keywords = { italic = true },
+          sidebars = "dark",
+          floats = "dark",
+        },
+      })
+      vim.cmd("colorscheme tokyonight")
     end,
   },
 }, {
   defaults = { lazy = false },
-  install = { colorscheme = { "gruvbox" } },
+  install = { colorscheme = { "tokyonight" } },
   checker = { enabled = false },
   performance = {
     rtp = {
