@@ -8,6 +8,12 @@ keymap("n", "<C-t>", ":ToggleTerm direction=float<CR>", { noremap = true, silent
 
 keymap("n", "<leader>h", ":nohlsearch<CR>", { noremap = true, silent = true, desc = "Clear search highlight" })
 
+-- j/k jump 5 lines (arrow keys stay single line)
+keymap("n", "j", "5j", { noremap = true, silent = true, desc = "Jump 5 lines down" })
+keymap("n", "k", "5k", { noremap = true, silent = true, desc = "Jump 5 lines up" })
+keymap("v", "j", "5j", { noremap = true, silent = true, desc = "Jump 5 lines down" })
+keymap("v", "k", "5k", { noremap = true, silent = true, desc = "Jump 5 lines up" })
+
 keymap("n", "<leader>ff", ":lua require('telescope.builtin').find_files()<CR>", { noremap = true, silent = true, desc = "Find files" })
 keymap("n", "<leader>fg", ":lua require('telescope.builtin').live_grep()<CR>", { noremap = true, silent = true, desc = "Find text in files" })
 keymap("n", "<leader>fG", ":lua require('telescope.builtin').live_grep()<CR>", { noremap = true, silent = true, desc = "Find text in files" })
