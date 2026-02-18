@@ -18,16 +18,94 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-  {
-    dir = "C:/Users/Victor/Projects/decent-notes/nvim-plugin",
-    name = "decent-notes",
-    config = function()
-      require("decent-notes").setup({
-        server = "http://10.8.0.1:5050",
-      })
-      vim.keymap.set("n", "<C-n>", "<cmd>DecentNotes<CR>", { desc = "Open Decent Notes" })
-    end,
-  },
+  (function()
+    -- User config: ~/.decent-notes.lua
+    -- Create this file to override defaults:
+    --   return {
+    --     server = "http://your-server:5050",
+    --     plugin_path = "~/your/custom/path/decent-notes/nvim-plugin",
+    --   }
+    local config_path = vim.fn.expand("~/.decent-notes.lua")
+    local user_config = {}
+    if vim.fn.filereadable(config_path) == 1 then
+      local ok, cfg = pcall(dofile, config_path)
+      if ok and type(cfg) == "table" then
+        user_config = cfg
+      else
+        vim.notify(
+          "[decent-notes] Failed to parse ~/.decent-notes.lua\n"
+            .. "Ensure it returns a valid Lua table, e.g.:\n\n"
+            .. '  return {\n    server = "http://your-server:5050",\n  }',
+          vim.log.levels.ERROR
+        )
+      end
+    end
+
+    -- Resolve server URL
+    local server = user_config.server
+    if not server then
+      vim.notify(
+        "[decent-notes] No server configured!\n"
+          .. "Create ~/.decent-notes.lua with:\n\n"
+          .. '  return {\n    server = "http://your-server:5050",\n  }',
+        vim.log.levels.WARN
+      )
+    end
+
+    -- Resolve plugin path
+    local search_paths = {
+      "~/Projects/decent-notes/nvim-plugin",
+      "~/projects/decent-notes/nvim-plugin",
+      "~/dev/decent-notes/nvim-plugin",
+      "~/src/decent-notes/nvim-plugin",
+    }
+
+    local plugin_dir = nil
+    if user_config.plugin_path then
+      local expanded = vim.fn.expand(user_config.plugin_path)
+      if vim.fn.isdirectory(expanded .. "/lua") == 1 then
+        plugin_dir = expanded
+      else
+        vim.notify(
+          "[decent-notes] Custom plugin_path not found or invalid:\n"
+            .. "  " .. expanded .. "\n\n"
+            .. "Ensure nvim-plugin/lua/ exists at that path.",
+          vim.log.levels.ERROR
+        )
+      end
+    else
+      for _, path in ipairs(search_paths) do
+        local expanded = vim.fn.expand(path)
+        if vim.fn.isdirectory(expanded .. "/lua") == 1 then
+          plugin_dir = expanded
+          break
+        end
+      end
+    end
+
+    if not plugin_dir then
+      vim.notify(
+        "[decent-notes] Plugin not found!\n"
+          .. "Clone the repo and ensure nvim-plugin/lua/ exists in one of:\n"
+          .. table.concat(vim.tbl_map(vim.fn.expand, search_paths), "\n")
+          .. "\n\nOr set a custom path in ~/.decent-notes.lua:\n\n"
+          .. '  return {\n    plugin_path = "~/your/path/decent-notes/nvim-plugin",\n  }',
+        vim.log.levels.WARN
+      )
+      return nil
+    end
+
+    return {
+      dir = plugin_dir,
+      name = "decent-notes",
+      config = function()
+        if server then
+          require("decent-notes").setup({ server = server })
+          vim.keymap.set("n", "<C-n>", "<cmd>DecentNotes<CR>", { desc = "Open Decent Notes" })
+        end
+      end,
+    }
+  end)(),
 
   { "nvim-lua/plenary.nvim" },
 
@@ -98,7 +176,7 @@ require("lazy").setup({
     "nvim-lualine/lualine.nvim",
     config = function()
       require("lualine").setup({
-        options = { theme = "tokyonight", component_separators = "|", section_separators = "", globalstatus = true },
+        options = { theme = "kanagawa", component_separators = "|", section_separators = "", globalstatus = true },
       })
     end,
   },
@@ -235,26 +313,26 @@ require("lazy").setup({
   { "mg979/vim-visual-multi" },
 
   {
-    "folke/tokyonight.nvim",
+    "rebelot/kanagawa.nvim",
     priority = 1000,
     config = function()
-      require("tokyonight").setup({
-        style = "night",
+      require("kanagawa").setup({
+        compile = false,
+        undercurl = true,
+        commentStyle = { italic = true },
+        keywordStyle = { italic = true },
+        statementStyle = { bold = true },
         transparent = false,
-        terminal_colors = true,
-        styles = {
-          comments = { italic = true },
-          keywords = { italic = true },
-          sidebars = "dark",
-          floats = "dark",
-        },
+        dimInactive = false,
+        terminalColors = true,
+        theme = "wave",
       })
-      vim.cmd("colorscheme tokyonight")
+      vim.cmd("colorscheme kanagawa")
     end,
   },
 }, {
   defaults = { lazy = false },
-  install = { colorscheme = { "tokyonight" } },
+  install = { colorscheme = { "kanagawa" } },
   checker = { enabled = false },
   performance = {
     rtp = {
