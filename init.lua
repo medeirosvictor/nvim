@@ -18,6 +18,17 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
+  {
+    dir = "C:/Users/Victor/Projects/decent-notes/nvim-plugin",
+    name = "decent-notes",
+    config = function()
+      require("decent-notes").setup({
+        server = "http://10.8.0.1:5050",
+      })
+      vim.keymap.set("n", "<C-n>", "<cmd>DecentNotes<CR>", { desc = "Open Decent Notes" })
+    end,
+  },
+
   { "nvim-lua/plenary.nvim" },
 
   { "nvim-tree/nvim-web-devicons" },
