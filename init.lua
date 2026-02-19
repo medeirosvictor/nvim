@@ -119,6 +119,9 @@ require("lazy").setup({
         disable_netrw = true,
         hijack_netrw = true,
         update_focused_file = { enable = true, update_cwd = false },
+        filesystem_watchers = {
+          ignore_dirs = { ".claude" },
+        },
         filters = { custom = { "^.git$" } },
         git = { enable = true, ignore = true },
         view = { width = 30, side = "left", signcolumn = "yes" },
