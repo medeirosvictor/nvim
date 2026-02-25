@@ -315,7 +315,7 @@ require("lazy").setup({
 
   { "mg979/vim-visual-multi" },
 
-  {
+{
     "rebelot/kanagawa.nvim",
     priority = 1000,
     config = function()
@@ -331,6 +331,16 @@ require("lazy").setup({
         theme = "wave",
       })
       vim.cmd("colorscheme kanagawa")
+    end,
+  },
+
+  {
+    "pablopunk/pi.nvim",
+    config = function()
+      require("pi").setup()
+
+      vim.keymap.set("n", "<leader>ai", ":PiAsk<CR>", { desc = "Ask pi" })
+      vim.keymap.set("v", "<leader>ai", ":PiAskSelection<CR>", { desc = "Ask pi (selection)" })
     end,
   },
 }, {
