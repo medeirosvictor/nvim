@@ -1,11 +1,22 @@
+-- Version guard: this config requires Neovim 0.11+
+if vim.fn.has("nvim-0.11") ~= 1 then
+  vim.api.nvim_echo({
+    { "This config requires Neovim 0.11+.\n", "ErrorMsg" },
+    { "You have: " .. tostring(vim.version()) .. "\n", "WarningMsg" },
+    { "Install from https://github.com/neovim/neovim/releases", "Normal" },
+  }, true, {})
+  return
+end
+
 require("victor.core.options")
+require("victor.core.autocmds")
 
 vim.defer_fn(function()
   require("victor.core.keymaps")
 end, 0)
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
   vim.fn.system({
     "git",
     "clone",
@@ -17,98 +28,89 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-require("lazy").setup({
-  (function()
-    -- User config: ~/.decent-notes.lua
-    -- Create this file to override defaults:
-    --   return {
-    --     server = "http://your-server:5050",
-    --     plugin_path = "~/your/custom/path/decent-notes/nvim-plugin",
-    --   }
-    local config_path = vim.fn.expand("~/.decent-notes.lua")
-    local user_config = {}
-    if vim.fn.filereadable(config_path) == 1 then
-      local ok, cfg = pcall(dofile, config_path)
-      if ok and type(cfg) == "table" then
-        user_config = cfg
-      else
-        vim.notify(
-          "[decent-notes] Failed to parse ~/.decent-notes.lua\n"
-            .. "Ensure it returns a valid Lua table, e.g.:\n\n"
-            .. '  return {\n    server = "http://your-server:5050",\n  }',
-          vim.log.levels.ERROR
-        )
-      end
-    end
+-- decent-notes: only load if ~/.decent-notes.lua exists
+local decent_notes_spec = (function()
+  local config_path = vim.fn.expand("~/.decent-notes.lua")
+  if vim.fn.filereadable(config_path) ~= 1 then
+    return nil
+  end
 
-    -- Resolve server URL
-    local server = user_config.server
-    if not server then
+  local ok, user_config = pcall(dofile, config_path)
+  if not ok or type(user_config) ~= "table" then
+    vim.notify(
+      "[decent-notes] Failed to parse ~/.decent-notes.lua\n"
+        .. "Ensure it returns a valid Lua table, e.g.:\n\n"
+        .. '  return {\n    server = "http://your-server:5050",\n  }',
+      vim.log.levels.ERROR
+    )
+    return nil
+  end
+
+  local server = user_config.server
+  if not server then
+    vim.notify(
+      "[decent-notes] No server configured in ~/.decent-notes.lua\n"
+        .. "Add:\n\n"
+        .. '  return {\n    server = "http://your-server:5050",\n  }',
+      vim.log.levels.WARN
+    )
+    return nil
+  end
+
+  local search_paths = {
+    "~/Projects/decent-notes/nvim-plugin",
+    "~/projects/decent-notes/nvim-plugin",
+    "~/dev/decent-notes/nvim-plugin",
+    "~/src/decent-notes/nvim-plugin",
+  }
+
+  local plugin_dir = nil
+  if user_config.plugin_path then
+    local expanded = vim.fn.expand(user_config.plugin_path)
+    if vim.fn.isdirectory(expanded .. "/lua") == 1 then
+      plugin_dir = expanded
+    else
       vim.notify(
-        "[decent-notes] No server configured!\n"
-          .. "Create ~/.decent-notes.lua with:\n\n"
-          .. '  return {\n    server = "http://your-server:5050",\n  }',
-        vim.log.levels.WARN
+        "[decent-notes] Custom plugin_path not found or invalid:\n"
+          .. "  " .. expanded .. "\n\n"
+          .. "Ensure nvim-plugin/lua/ exists at that path.",
+        vim.log.levels.ERROR
       )
     end
-
-    -- Resolve plugin path
-    local search_paths = {
-      "~/Projects/decent-notes/nvim-plugin",
-      "~/projects/decent-notes/nvim-plugin",
-      "~/dev/decent-notes/nvim-plugin",
-      "~/src/decent-notes/nvim-plugin",
-    }
-
-    local plugin_dir = nil
-    if user_config.plugin_path then
-      local expanded = vim.fn.expand(user_config.plugin_path)
+  else
+    for _, path in ipairs(search_paths) do
+      local expanded = vim.fn.expand(path)
       if vim.fn.isdirectory(expanded .. "/lua") == 1 then
         plugin_dir = expanded
-      else
-        vim.notify(
-          "[decent-notes] Custom plugin_path not found or invalid:\n"
-            .. "  " .. expanded .. "\n\n"
-            .. "Ensure nvim-plugin/lua/ exists at that path.",
-          vim.log.levels.ERROR
-        )
-      end
-    else
-      for _, path in ipairs(search_paths) do
-        local expanded = vim.fn.expand(path)
-        if vim.fn.isdirectory(expanded .. "/lua") == 1 then
-          plugin_dir = expanded
-          break
-        end
+        break
       end
     end
+  end
 
-    if not plugin_dir then
-      vim.notify(
-        "[decent-notes] Plugin not found!\n"
-          .. "Clone the repo and ensure nvim-plugin/lua/ exists in one of:\n"
-          .. table.concat(vim.tbl_map(vim.fn.expand, search_paths), "\n")
-          .. "\n\nOr set a custom path in ~/.decent-notes.lua:\n\n"
-          .. '  return {\n    plugin_path = "~/your/path/decent-notes/nvim-plugin",\n  }',
-        vim.log.levels.WARN
-      )
-      return nil
-    end
+  if not plugin_dir then
+    vim.notify(
+      "[decent-notes] Config found but plugin not found!\n"
+        .. "Clone the repo and ensure nvim-plugin/lua/ exists in one of:\n"
+        .. table.concat(vim.tbl_map(vim.fn.expand, search_paths), "\n")
+        .. "\n\nOr set a custom path in ~/.decent-notes.lua:\n\n"
+        .. '  return {\n    plugin_path = "~/your/path/decent-notes/nvim-plugin",\n  }',
+      vim.log.levels.WARN
+    )
+    return nil
+  end
 
-    return {
-      dir = plugin_dir,
-      name = "decent-notes",
-      config = function()
-        if server then
-          require("decent-notes").setup({ server = server })
-          vim.keymap.set("n", "<C-n>", "<cmd>DecentNotes<CR>", { desc = "Open Decent Notes" })
-        end
-      end,
-    }
-  end)(),
+  return {
+    dir = plugin_dir,
+    name = "decent-notes",
+    config = function()
+      require("decent-notes").setup({ server = server })
+      vim.keymap.set("n", "<C-n>", "<cmd>DecentNotes<CR>", { desc = "Open Decent Notes" })
+    end,
+  }
+end)()
 
+local plugins = {
   { "nvim-lua/plenary.nvim" },
-
   { "nvim-tree/nvim-web-devicons" },
 
   {
@@ -152,7 +154,7 @@ require("lazy").setup({
                 untracked = "󰊠",
                 renamed = "󰁕",
                 deleted = "󰀍",
-                ignored = "�esco",
+                ignored = "◌",
               },
             },
           },
@@ -240,8 +242,6 @@ require("lazy").setup({
         cmp_nvim_lsp.default_capabilities()
       )
 
-
-
       local servers = { "ts_ls", "pyright", "gopls", "clangd", "rust_analyzer" }
       for _, server in ipairs(servers) do
         vim.lsp.config(server, { capabilities = capabilities })
@@ -262,6 +262,11 @@ require("lazy").setup({
       })
 
       cmp.setup({
+        snippet = {
+          expand = function(args)
+            luasnip.lsp_expand(args.body)
+          end,
+        },
         mapping = cmp.mapping.preset.insert({
           ["<C-Space>"] = cmp.mapping.complete(),
           ["<CR>"] = cmp.mapping.confirm({ select = true }),
@@ -275,16 +280,13 @@ require("lazy").setup({
             end
           end, { "i", "s" }),
         }),
-        sources = cmp.config.sources({ { name = "nvim_lsp" }, { name = "luasnip" }, { name = "path" } }, { { name = "buffer" } }),
+        sources = cmp.config.sources(
+          { { name = "nvim_lsp" }, { name = "luasnip" }, { name = "path" } },
+          { { name = "buffer" } }
+        ),
       })
     end,
   },
-  { "hrsh7th/cmp-nvim-lsp" },
-  { "hrsh7th/cmp-buffer" },
-  { "hrsh7th/cmp-path" },
-  { "hrsh7th/cmp-cmdline" },
-  { "L3MON4D3/LuaSnip" },
-  { "saadparwaiz1/cmp_luasnip" },
 
   {
     "nvim-treesitter/nvim-treesitter",
@@ -315,7 +317,7 @@ require("lazy").setup({
 
   { "mg979/vim-visual-multi" },
 
-{
+  {
     "rebelot/kanagawa.nvim",
     priority = 1000,
     config = function()
@@ -338,12 +340,18 @@ require("lazy").setup({
     "pablopunk/pi.nvim",
     config = function()
       require("pi").setup()
-
       vim.keymap.set("n", "<leader>ai", ":PiAsk<CR>", { desc = "Ask pi" })
       vim.keymap.set("v", "<leader>ai", ":PiAskSelection<CR>", { desc = "Ask pi (selection)" })
     end,
   },
-}, {
+}
+
+-- Insert decent-notes only if it resolved successfully
+if decent_notes_spec then
+  table.insert(plugins, 1, decent_notes_spec)
+end
+
+require("lazy").setup(plugins, {
   defaults = { lazy = false },
   install = { colorscheme = { "kanagawa" } },
   checker = { enabled = false },

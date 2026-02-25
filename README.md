@@ -1,120 +1,134 @@
 # Neovim Configuration
 
-A modern Neovim setup using the built-in `vim.pack` package manager with Lua configuration.
+A modern Neovim setup using [lazy.nvim](https://github.com/folke/lazy.nvim) with Lua configuration.
+
+## Requirements
+
+- **Neovim 0.11+** — `apt install neovim` often gives older versions, so grab the latest from [GitHub releases](https://github.com/neovim/neovim/releases)
+- **git** — required for lazy.nvim plugin management
+- **C compiler** (gcc/clang) — required for treesitter parser compilation
+- **A Nerd Font** — required for icons ([nerdfonts.com](https://www.nerdfonts.com/))
+
+### Optional (for full LSP support)
+
+- `node` + `npm` — for ts_ls, pyright, eslint
+- `python3` — for pyright
+- `go` — for gopls
+- `cargo` — for rust-analyzer
+- `ripgrep` (`rg`) — for telescope live_grep
+- `fd` — for faster telescope file finding
+
+## Quick Start
+
+```bash
+# Clone to your config directory
+git clone https://github.com/YOUR_USER/nvim.git ~/.config/nvim
+
+# Open Neovim — plugins install automatically on first launch
+nvim
+```
+
+Run `:checkhealth victor` to verify all dependencies are present.
 
 ## File Structure
 
 ```
 nvim/
-├── init.lua              # Main entry point - loads all config modules
+├── init.lua                    # Entry point — plugin definitions, lazy.nvim bootstrap
 ├── lua/victor/
 │   ├── core/
-│   │   ├── options.lua   # General editor settings (indentation, colors, behavior)
-│   │   ├── keymaps.lua   # Keyboard shortcuts
-│   │   └── autocmds.lua  # Automatic commands (events triggered on actions)
-│   ├── plugins/
-│   │   └── init.lua      # Plugin configurations and vim.pack.add() calls
-│   └── languages/
-│       ├── lsp.lua       # LSP (Language Server Protocol) configuration
-│       └── treesitter.lua# Treesitter syntax highlighting setup
-└── README.md             # This file
+│   │   ├── options.lua         # Editor settings (indentation, colors, behavior)
+│   │   ├── keymaps.lua         # Keyboard shortcuts
+│   │   └── autocmds.lua        # Autocommands (yank highlight, format options, etc.)
+│   └── health/
+│       └── init.lua            # :checkhealth victor — dependency checker
+├── lazy-lock.json              # Plugin version lockfile
+└── README.md
 ```
 
 ## Where to Make Changes
 
 ### Adding/Removing Plugins
-Edit `lua/victor/plugins/init.lua` - look for the `plugins` table at the top. Add new plugins using:
-```lua
-{ src = "https://github.com/username/plugin_name" }
-```
+Edit `init.lua` — find the `plugins` table and add/remove lazy.nvim plugin specs.
 
 ### Changing Keybindings
-Edit `lua/victor/core/keymaps.lua`. Use `vim.keymap.set()` with the format:
-```lua
-keymap("mode", "shortcut", "action", { options, desc = "description" })
-```
+Edit `lua/victor/core/keymaps.lua`.
 
 ### Editor Settings
-Edit `lua/victor/core/options.lua` - contains options like:
-- `tabstop`, `shiftwidth` - indentation
-- `relativenumber`, `number` - line numbers
-- `termguicolors` - true color support
-- etc.
+Edit `lua/victor/core/options.lua` — indentation, line numbers, clipboard, etc.
 
-### LSP/Language Servers
-Edit `lua/victor/languages/lsp.lua` to:
-- Add/remove language servers in `ensure_installed`
-- Configure LSP keybindings
-- Set up completion (nvim-cmp)
+### LSP Servers
+Edit `init.lua` — find the `servers` table inside the nvim-cmp config block. LSP servers must be installed on your system (e.g. via `npm install -g typescript-language-server`).
 
 ### Treesitter Languages
-Edit `lua/victor/languages/treesitter.lua` - add languages to `ensure_installed` list.
+Edit `init.lua` — find the `ensure_installed` list inside the nvim-treesitter config block.
 
 ## Installed Plugins
 
 ### Core
-- **nvim-tree/nvim-tree.lua** - File explorer sidebar
-- **nvim-tree/nvim-web-devicons** - File icons
-- **nvim-lualine/lualine.nvim** - Status line
-- **folke/which-key.nvim** - Keybinding popup helper
+- **nvim-tree.lua** — file explorer sidebar
+- **nvim-web-devicons** — file icons
+- **lualine.nvim** — status line (kanagawa theme)
+- **which-key.nvim** — keybinding popup helper
 
 ### Fuzzy Finding
-- **nvim-telescope/telescope.nvim** - Fuzzy finder (files, grep, etc.)
-- **nvim-telescope/telescope-themes** - Theme picker
+- **telescope.nvim** — fuzzy finder (files, grep, buffers)
 
 ### Git
-- **lewis6991/gitsigns.nvim** - Git signs in gutter
+- **gitsigns.nvim** — git signs in gutter, hunk staging/resetting
 
 ### Terminal
-- **akinsho/toggleterm.nvim** - Embedded terminal
+- **toggleterm.nvim** — floating terminal
 
-### Completion
-- **hrsh7th/nvim-cmp** - Completion framework
-- **hrsh7th/cmp-nvim-lsp** - LSP completion source
-- **hrsh7th/cmp-buffer** - Buffer completion
-- **hrsh7th/cmp-path** - Path completion
-- **hrsh7th/cmp-cmdline** - Command line completion
-- **saadparwaiz1/cmp_luasnip** - Snippet completion
-
-### Snippets
-- **L3MON4D3/LuaSnip** - Snippet engine
-
-### LSP & Languages
-- **neovim/nvim-lspconfig** - LSP client configuration
-- **williamboman/mason.nvim** - LSP server installer
-- **williamboman/mason-lspconfig.nvim** - Mason + LSP config integration
-- **nvim-treesitter/nvim-treesitter** - Syntax highlighting
-
-### Multi-cursor
-- **mg979/vim-visual-multi** - Multiple cursors (Ctrl+D / Ctrl+R)
+### Completion & LSP
+- **nvim-cmp** — completion framework (with buffer, path, LSP, snippet sources)
+- **LuaSnip** — snippet engine
+- **nvim-lspconfig** — LSP client configuration
+- LSP configured via `vim.lsp.config()` / `vim.lsp.enable()` (Neovim 0.11+ native)
 
 ### Navigation
-- **ThePrimeagen/harpoon** - Quick file marking/navigation (harpoon2)
+- **harpoon** (v2) — quick file marking/navigation
 
-### Themes
-- **ellisonleao/gruvbox.nvim** - Gruvbox dark theme (default)
+### Multi-cursor
+- **vim-visual-multi** — multiple cursors
+
+### Theme
+- **kanagawa.nvim** — kanagawa wave theme
+
+### AI
+- **pi.nvim** — AI assistant integration
+
+### Optional
+- **decent-notes** — personal notes plugin (only loads if `~/.decent-notes.lua` exists)
 
 ## Keybindings
 
 | Shortcut | Action |
 |----------|--------|
-| `Space` | Show which-key popup (all available commands) |
-| `Ctrl+F` | Find text in files (Telescope live_grep) |
-| `Ctrl+P` | Find file (Telescope find_files) |
-| `Ctrl+B` | Toggle sidebar (nvim-tree) |
-| `Ctrl+T` | Toggle terminal |
-| `Ctrl+Shift+T` | Pick theme (Telescope themes) |
-| `Ctrl+D` | Select next occurrence (visual-multi) |
-| `Ctrl+R` | Multi-cursor replace (visual mode) |
+| `Space` | Leader key (shows which-key popup) |
+| `Ctrl+P` | Find files (telescope) |
+| `Ctrl+F` | Find text in current buffer |
+| `Ctrl+Shift+F` | Find text in all files (live grep) |
+| `Ctrl+B` | Toggle file tree sidebar |
+| `Ctrl+T` | Toggle floating terminal |
+
+### File Navigation
+| Shortcut | Action |
+|----------|--------|
+| `Space+ff` | Find files |
+| `Space+fg` | Live grep |
+| `Space+fb` | Find buffers |
+| `Space+fh` | Find help tags |
+| `Space+e` | Focus file tree |
 
 ### Window Navigation
 | Shortcut | Action |
 |----------|--------|
-| `Ctrl+h/j/k/l` | Navigate windows |
+| `Ctrl+h/j/k/l` | Navigate between windows |
 | `Space+sv` | Split vertically |
 | `Space+sh` | Split horizontally |
 
-### Tab Navigation
+### Tabs
 | Shortcut | Action |
 |----------|--------|
 | `Space+to` | New tab |
@@ -127,42 +141,42 @@ Edit `lua/victor/languages/treesitter.lua` - add languages to `ensure_installed`
 |----------|--------|
 | `Space+a` | Add file to harpoon |
 | `Space+hh` | Open harpoon menu |
-| `Space+h1-4` | Jump to harpoon mark 1-4 |
+| `Space+h1–h4` | Jump to harpoon mark 1–4 |
 
 ### LSP
 | Shortcut | Action |
 |----------|--------|
 | `gd` | Go to definition |
-| `gD` | Go to declaration |
-| `K` | Hover |
-| `gi` | Go to implementation |
+| `K` | Hover documentation |
 | `gr` | Go to references |
-| `rn` | Rename |
-| `ca` | Code action |
-| `[d` / `]d` | Previous/Next diagnostic |
-
-### Telescope
-| Shortcut | Action |
-|----------|--------|
-| `Space+ff` | Find files |
-| `Space+fg` | Find text (live grep) |
-| `Space+fb` | Find buffers |
-| `Space+fh` | Find help tags |
+| `Space+rn` | Rename symbol |
+| `Space+ca` | Code action |
 
 ### Git (gitsigns)
 | Shortcut | Action |
 |----------|--------|
-| `[h` / `]h` | Previous/Next hunk |
+| `]h` / `[h` | Next / previous hunk |
 | `Space+ghs` | Stage hunk |
 | `Space+ghr` | Reset hunk |
 
-## First Setup
+### Other
+| Shortcut | Action |
+|----------|--------|
+| `j` / `k` | Jump 5 lines (normal & visual mode) |
+| `Space+h` | Clear search highlight |
+| `Space+th` | Pick colorscheme |
+| `Space+ai` | Ask pi (AI) |
+| `Space+r` (visual) | Replace all occurrences of selection |
 
-1. Open Neovim - plugins will install automatically via `vim.pack`
-2. Restart Neovim (`:Restart` or close and reopen)
-3. Install LSP servers: Run `:Mason` and install desired servers
-4. Install treesitter parsers: Run `:TSUpdateSync` or restart nvim
+## Decent Notes (Optional)
 
-## Theme
+If you use [decent-notes](https://github.com/YOUR_USER/decent-notes), create `~/.decent-notes.lua`:
 
-Default theme is **gruvbox** (dark mode). Use `Ctrl+Shift+T` to pick a different theme via Telescope.
+```lua
+return {
+  server = "http://your-server:5050",
+  -- plugin_path = "~/custom/path/decent-notes/nvim-plugin",  -- optional
+}
+```
+
+The plugin only loads when this file exists. No warnings on machines without it.
