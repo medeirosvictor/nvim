@@ -290,13 +290,25 @@ local plugins = {
 
   {
     "nvim-treesitter/nvim-treesitter",
+    build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = { "lua", "vim", "javascript", "typescript", "python", "go", "rust", "html", "css", "json" },
-        sync_install = false,
-        auto_install = true,
-        highlight = { enable = true },
-      })
+      -- New nvim-treesitter: highlight is built into Neovim (vim.treesitter.start())
+      -- Parsers to auto-install if missing
+      local parsers = { "lua", "vim", "vimdoc", "javascript", "typescript", "python", "go", "rust", "html", "css", "json" }
+      local installed = require("nvim-treesitter").get_installed()
+      local installed_set = {}
+      for _, p in ipairs(installed) do
+        installed_set[p] = true
+      end
+      local to_install = {}
+      for _, p in ipairs(parsers) do
+        if not installed_set[p] then
+          table.insert(to_install, p)
+        end
+      end
+      if #to_install > 0 then
+        vim.cmd("TSInstall " .. table.concat(to_install, " "))
+      end
     end,
   },
 
