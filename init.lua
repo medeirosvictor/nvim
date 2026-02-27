@@ -57,51 +57,8 @@ local decent_notes_spec = (function()
     return nil
   end
 
-  local search_paths = {
-    "~/Projects/decent-notes/nvim-plugin",
-    "~/projects/decent-notes/nvim-plugin",
-    "~/dev/decent-notes/nvim-plugin",
-    "~/src/decent-notes/nvim-plugin",
-  }
-
-  local plugin_dir = nil
-  if user_config.plugin_path then
-    local expanded = vim.fn.expand(user_config.plugin_path)
-    if vim.fn.isdirectory(expanded .. "/lua") == 1 then
-      plugin_dir = expanded
-    else
-      vim.notify(
-        "[decent-notes] Custom plugin_path not found or invalid:\n"
-          .. "  " .. expanded .. "\n\n"
-          .. "Ensure nvim-plugin/lua/ exists at that path.",
-        vim.log.levels.ERROR
-      )
-    end
-  else
-    for _, path in ipairs(search_paths) do
-      local expanded = vim.fn.expand(path)
-      if vim.fn.isdirectory(expanded .. "/lua") == 1 then
-        plugin_dir = expanded
-        break
-      end
-    end
-  end
-
-  if not plugin_dir then
-    vim.notify(
-      "[decent-notes] Config found but plugin not found!\n"
-        .. "Clone the repo and ensure nvim-plugin/lua/ exists in one of:\n"
-        .. table.concat(vim.tbl_map(vim.fn.expand, search_paths), "\n")
-        .. "\n\nOr set a custom path in ~/.decent-notes.lua:\n\n"
-        .. '  return {\n    plugin_path = "~/your/path/decent-notes/nvim-plugin",\n  }',
-      vim.log.levels.WARN
-    )
-    return nil
-  end
-
   return {
-    dir = plugin_dir,
-    name = "decent-notes",
+    "medeirosvictor/decent-notes.nvim",
     config = function()
       require("decent-notes").setup({ server = server })
       vim.keymap.set("n", "<C-n>", "<cmd>DecentNotes<CR>", { desc = "Open Decent Notes" })

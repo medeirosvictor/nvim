@@ -170,13 +170,12 @@ Edit `init.lua` — find the `ensure_installed` list inside the nvim-treesitter 
 
 ## Decent Notes (Optional)
 
-If you use [decent-notes](https://github.com/YOUR_USER/decent-notes), create `~/.decent-notes.lua`:
+If you use [decent-notes.nvim](https://github.com/medeirosvictor/decent-notes.nvim), create `~/.decent-notes.lua`:
 
 ```lua
 return {
   server = "http://your-server:5050",
-  -- plugin_path = "~/custom/path/decent-notes/nvim-plugin",  -- optional
 }
 ```
 
-The plugin only loads when this file exists. No warnings on machines without it.
+The plugin is fetched from GitHub via lazy.nvim and only loads when this file exists. No warnings on machines without it.
