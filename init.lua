@@ -325,6 +325,7 @@ local plugins = {
 
   {
     "medeirosvictor/sade.nvim",
+    branch = "master",
     config = function()
       require("sade").setup()
       vim.keymap.set("n", "<leader>st", "<cmd>SadeTree<CR>", { desc = "Toggle SADE Tree" })
