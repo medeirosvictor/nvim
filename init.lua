@@ -329,6 +329,7 @@ local plugins = {
     config = function()
       require("sade").setup()
       vim.keymap.set("n", "<leader>st", "<cmd>SadeTree<CR>", { desc = "Toggle SADE Tree" })
+      vim.keymap.set("n", "<leader>xx", "<cmd>SadeStop<CR>", { desc = "Stop all agent requests" })
     end,
   },
 }
