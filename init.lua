@@ -137,8 +137,17 @@ local plugins = {
   {
     "nvim-lualine/lualine.nvim",
     config = function()
+      local sade_statusline = require("sade.statusline")
       require("lualine").setup({
         options = { theme = "kanagawa", component_separators = "|", section_separators = "", globalstatus = true },
+        sections = {
+          lualine_a = { "mode" },
+          lualine_b = { "branch", "diff", "diagnostics" },
+          lualine_c = { "filename", { sade_statusline.component, color = sade_statusline.color } },
+          lualine_x = { "encoding", "fileformat", "filetype" },
+          lualine_y = { "progress" },
+          lualine_z = { "location" },
+        },
       })
     end,
   },
@@ -199,7 +208,7 @@ local plugins = {
         cmp_nvim_lsp.default_capabilities()
       )
 
-      local servers = { "ts_ls", "pyright", "gopls", "clangd", "rust_analyzer" }
+      local servers = { "ts_ls", "pyright", "gopls", "clangd", "rust_analyzer", "svelte" }
       for _, server in ipairs(servers) do
         vim.lsp.config(server, { capabilities = capabilities })
         vim.lsp.enable(server)
@@ -251,7 +260,7 @@ local plugins = {
     config = function()
       -- New nvim-treesitter: highlight is built into Neovim (vim.treesitter.start())
       -- Parsers to auto-install if missing
-      local parsers = { "lua", "vim", "vimdoc", "javascript", "typescript", "python", "go", "rust", "html", "css", "json" }
+      local parsers = { "lua", "vim", "vimdoc", "javascript", "typescript", "python", "go", "rust", "html", "css", "json", "svelte" }
       local installed = require("nvim-treesitter").get_installed()
       local installed_set = {}
       for _, p in ipairs(installed) do
@@ -311,6 +320,14 @@ local plugins = {
       require("pi").setup()
       vim.keymap.set("n", "<leader>ai", ":PiAsk<CR>", { desc = "Ask pi" })
       vim.keymap.set("v", "<leader>ai", ":PiAskSelection<CR>", { desc = "Ask pi (selection)" })
+    end,
+  },
+
+  {
+    "medeirosvictor/sade.nvim",
+    config = function()
+      require("sade").setup()
+      vim.keymap.set("n", "<leader>st", "<cmd>SadeTree<CR>", { desc = "Toggle SADE Tree" })
     end,
   },
 }

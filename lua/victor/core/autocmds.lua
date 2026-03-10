@@ -26,3 +26,12 @@ autocmd("VimEnter", {
     vim.cmd("NvimTreeOpen")
   end,
 })
+
+-- Enable treesitter-based indentation (makes = work properly in visual mode)
+autocmd("FileType", {
+  callback = function()
+    if pcall(vim.treesitter.start) then
+      vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+    end
+  end,
+})
