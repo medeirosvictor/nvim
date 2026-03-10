@@ -77,6 +77,7 @@ local plugins = {
       require("nvim-tree").setup({
         disable_netrw = true,
         hijack_netrw = true,
+        open_on_setup = false, -- Don't auto-open, let SADE Super Tree be the default
         update_focused_file = { enable = true, update_cwd = false },
         filesystem_watchers = {
           ignore_dirs = { ".claude" },
@@ -327,7 +328,11 @@ local plugins = {
     "medeirosvictor/sade.nvim",
     branch = "master",
     config = function()
-      require("sade").setup()
+      require("sade").setup({
+        tree = {
+          auto_open = true,
+        },
+      })
       vim.keymap.set("n", "<leader>st", "<cmd>SadeTree<CR>", { desc = "Toggle SADE Tree" })
       vim.keymap.set("n", "<leader>xx", "<cmd>SadeStop<CR>", { desc = "Stop all agent requests" })
     end,
