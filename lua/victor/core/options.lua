@@ -36,7 +36,6 @@ g.mapleader = " "
 
 opt.clipboard = "unnamedplus"
 
--- Treesitter fold
-opt.foldmethod = "expr"
-opt.foldexpr = "nvim_treesitter#foldexpr()"
+-- Syntax-based fold
+opt.foldmethod = "syntax"
 opt.foldenable = false
