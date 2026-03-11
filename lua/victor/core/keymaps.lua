@@ -48,4 +48,6 @@ keymap("n", "<leader>h4", function() harpoon:list():select(4) end, { noremap = t
 keymap("x", "<leader>r", '"zy:%s/\\V<C-r>z//g<left><left>', { noremap = true, silent = false, desc = "Replace all in buffer (visual selection)" })
 
 -- Folding
-keymap("n", "<leader>zf", "z<CR>", { noremap = true, silent = true, desc = "Open fold at cursor" })
+keymap("n", "<leader>zf", function()
+  vim.cmd("normal! z\<CR>")
+end, { noremap = true, silent = true, desc = "Open fold at cursor" })
