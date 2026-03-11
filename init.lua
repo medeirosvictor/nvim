@@ -337,18 +337,6 @@ local plugins = {
       vim.keymap.set("n", "<leader>xx", "<cmd>SadeStop<CR>", { desc = "Stop all agent requests" })
     end,
   },
-
-  {
-    "kevinhwang91/nvim-ufo",
-    dependencies = "kevinhwang91/null-ls.nvim",
-    config = function()
-      require("nvim-ufo").setup()
-      vim.keymap.set("n", "za", require("nvim-ufo").openFold)
-      vim.keymap.set("n", "zc", require("nvim-ufo").closeFold)
-      vim.keymap.set("n", "zA", require("nvim-ufo").openAllFolds)
-      vim.keymap.set("n", "zM", require("nvim-ufo").closeAllFolds)
-    end,
-  },
 }
 
 -- Insert decent-notes only if it resolved successfully

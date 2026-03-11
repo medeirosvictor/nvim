@@ -46,3 +46,6 @@ keymap("n", "<leader>h3", function() harpoon:list():select(3) end, { noremap = t
 keymap("n", "<leader>h4", function() harpoon:list():select(4) end, { noremap = true, silent = true, desc = "Harpoon 4" })
 
 keymap("x", "<leader>r", '"zy:%s/\\V<C-r>z//g<left><left>', { noremap = true, silent = false, desc = "Replace all in buffer (visual selection)" })
+
+-- Folding
+keymap("n", "<leader>zf", "za", { noremap = true, silent = true, desc = "Toggle fold" })
