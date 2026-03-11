@@ -49,5 +49,5 @@ keymap("x", "<leader>r", '"zy:%s/\\V<C-r>z//g<left><left>', { noremap = true, si
 
 -- Folding
 keymap("n", "<leader>zf", function()
-  vim.cmd("normal! z\<CR>")
+  vim.cmd("normal! z\r")
 end, { noremap = true, silent = true, desc = "Open fold at cursor" })
