@@ -77,7 +77,7 @@ local plugins = {
       require("nvim-tree").setup({
         disable_netrw = true,
         hijack_netrw = true,
-        open_on_setup_file = false, -- Don't auto-open, let SADE Super Tree be the default
+        -- Removed: open_on_setup_file is deprecated
         update_focused_file = { enable = true, update_cwd = false },
         filesystem_watchers = {
           ignore_dirs = { ".claude" },
