@@ -77,7 +77,7 @@ local plugins = {
       require("nvim-tree").setup({
         disable_netrw = true,
         hijack_netrw = true,
-        open_on_setup = false, -- Don't auto-open, let SADE Super Tree be the default
+        open_on_setup_file = false, -- Don't auto-open, let SADE Super Tree be the default
         update_focused_file = { enable = true, update_cwd = false },
         filesystem_watchers = {
           ignore_dirs = { ".claude" },
@@ -260,21 +260,12 @@ local plugins = {
     build = ":TSUpdate",
     config = function()
       -- New nvim-treesitter: highlight is built into Neovim (vim.treesitter.start())
-      -- Parsers to auto-install if missing
+      -- Auto-install parsers if missing
       local parsers = { "lua", "vim", "vimdoc", "javascript", "typescript", "python", "go", "rust", "html", "css", "json", "svelte" }
-      local installed = require("nvim-treesitter").get_installed()
-      local installed_set = {}
-      for _, p in ipairs(installed) do
-        installed_set[p] = true
-      end
-      local to_install = {}
-      for _, p in ipairs(parsers) do
-        if not installed_set[p] then
-          table.insert(to_install, p)
-        end
-      end
-      if #to_install > 0 then
-        vim.cmd("TSInstall " .. table.concat(to_install, " "))
+      local installed = vim.fn.stdpath("data") .. "/lazy/nvim-treesitter/parser"
+      local ok = vim.fn.isdirectory(installed) == 1
+      if not ok then
+        vim.cmd("TSInstall " .. table.concat(parsers, " "))
       end
     end,
   },
@@ -335,6 +326,7 @@ local plugins = {
       })
       vim.keymap.set("n", "<leader>st", "<cmd>SadeTree<CR>", { desc = "Toggle SADE Tree" })
       vim.keymap.set("n", "<leader>xx", "<cmd>SadeStop<CR>", { desc = "Stop all agent requests" })
+      vim.keymap.set("n", "<leader>ah", "<cmd>SadeHelp<CR>", { desc = "SADE Help" })
     end,
   },
 }
