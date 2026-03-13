@@ -139,7 +139,7 @@ local plugins = {
     "nvim-lualine/lualine.nvim",
     config = function()
       require("lualine").setup({
-        options = { theme = "kanagawa", component_separators = "|", section_separators = "", globalstatus = true },
+        options = { theme = "auto", component_separators = "|", section_separators = "", globalstatus = true },
         sections = {
           lualine_a = { "mode" },
           lualine_b = { "branch", "diff", "diagnostics" },
@@ -286,22 +286,87 @@ local plugins = {
 
   { "mg979/vim-visual-multi" },
 
+  -- Theme plugins
+  { "rebelot/kanagawa.nvim" },
+  { "EdenEast/nightfox.nvim" },
+  { "catppuccin/nvim", name = "catppuccin" },
   {
-    "rebelot/kanagawa.nvim",
-    priority = 1000,
+    "zaldih/themery.nvim",
+    lazy = false,
     config = function()
-      require("kanagawa").setup({
-        compile = false,
-        undercurl = true,
-        commentStyle = { italic = true },
-        keywordStyle = { italic = true },
-        statementStyle = { bold = true },
-        transparent = false,
-        dimInactive = false,
-        terminalColors = true,
-        theme = "wave",
+      require("themery").setup({
+        themes = {
+          {
+            name = "Kanagawa Wave",
+            colorscheme = "kanagawa",
+            before = [[
+              require("kanagawa").setup({
+                compile = false,
+                undercurl = true,
+                commentStyle = { italic = true },
+                keywordStyle = { italic = true },
+                statementStyle = { bold = true },
+                transparent = false,
+                dimInactive = false,
+                terminalColors = true,
+                theme = "wave",
+              })
+            ]],
+          },
+          {
+            name = "Kanagawa Lotus",
+            colorscheme = "kanagawa",
+            before = [[
+              require("kanagawa").setup({
+                compile = false,
+                undercurl = true,
+                commentStyle = { italic = true },
+                keywordStyle = { italic = true },
+                statementStyle = { bold = true },
+                transparent = false,
+                dimInactive = false,
+                terminalColors = true,
+                theme = "lotus",
+              })
+            ]],
+          },
+          {
+            name = "Nightfox Tera",
+            colorscheme = "terafox",
+          },
+          {
+            name = "Nightfox Nord",
+            colorscheme = "nordfox",
+          },
+          {
+            name = "Nightfox Dayfox",
+            colorscheme = "dayfox",
+          },
+          {
+            name = "Catppuccin Mocha",
+            colorscheme = "catppuccin",
+            before = [[
+              require("catppuccin").setup()
+              vim.opt.background = "dark"
+            ]],
+          },
+          {
+            name = "Catppuccin Latte",
+            colorscheme = "catppuccin",
+            before = [[
+              require("catppuccin").setup()
+              vim.opt.background = "light"
+            ]],
+          },
+        },
+        livePreview = true,
       })
-      vim.cmd("colorscheme kanagawa")
+      
+      -- Set default theme (terafox)
+      vim.cmd("colorscheme terafox")
+      
+      -- Keymap to switch themes
+      vim.keymap.set("n", "<leader>ct", ":Themery<CR>", { desc = "Switch theme" })
     end,
   },
 
@@ -353,7 +418,7 @@ end
 
 require("lazy").setup(plugins, {
   defaults = { lazy = false },
-  install = { colorscheme = { "kanagawa" } },
+  install = { colorscheme = { "terafox" } },
   checker = { enabled = false },
   performance = {
     rtp = {
