@@ -138,13 +138,12 @@ local plugins = {
   {
     "nvim-lualine/lualine.nvim",
     config = function()
-      local sade_statusline = require("sade.statusline")
       require("lualine").setup({
         options = { theme = "kanagawa", component_separators = "|", section_separators = "", globalstatus = true },
         sections = {
           lualine_a = { "mode" },
           lualine_b = { "branch", "diff", "diagnostics" },
-          lualine_c = { "filename", { sade_statusline.component, color = sade_statusline.color } },
+          lualine_c = { "filename" },
           lualine_x = { "encoding", "fileformat", "filetype" },
           lualine_y = { "progress" },
           lualine_z = { "location" },
@@ -316,17 +315,33 @@ local plugins = {
   },
 
   {
-    "medeirosvictor/sade.nvim",
-    branch = "master",
+    -- Pin 99 to a specific commit if it breaks:
+    -- { "ThePrimeagen/99", commit = "abc123f" }
+    "victor/v99",
+    dependencies = { "ThePrimeagen/99" },
     config = function()
-      require("sade").setup({
-        tree = {
-          auto_open = true,
+      local v99 = require("v99")
+      
+      v99.setup({
+        completion = {
+          custom_rules = {
+            "scratch/custom_rules/",
+          },
+          source = "native",
         },
       })
-      vim.keymap.set("n", "<leader>st", "<cmd>SadeTree<CR>", { desc = "Toggle SADE Tree" })
-      vim.keymap.set("n", "<leader>xx", "<cmd>SadeStop<CR>", { desc = "Stop all agent requests" })
-      vim.keymap.set("n", "<leader>ah", "<cmd>SadeHelp<CR>", { desc = "SADE Help" })
+
+      vim.keymap.set("v", "<leader>9v", function()
+        v99.api.visual()
+      end)
+
+      vim.keymap.set("n", "<leader>9x", function()
+        v99.api.stop_all_requests()
+      end)
+
+      vim.keymap.set("n", "<leader>9s", function()
+        v99.api.search()
+      end)
     end,
   },
 }
