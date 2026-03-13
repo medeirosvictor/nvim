@@ -317,7 +317,7 @@ local plugins = {
   {
     -- Pin 99 to a specific commit if it breaks:
     -- { "ThePrimeagen/99", commit = "abc123f" }
-    "victor/v99",
+    "medeirosvictor/v99",
     dependencies = { "ThePrimeagen/99" },
     config = function()
       local v99 = require("v99")
