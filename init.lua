@@ -286,6 +286,17 @@ local plugins = {
 
   { "mg979/vim-visual-multi" },
 
+  -- Auto-pairs for brackets
+  {
+    "jiangmiao/auto-pairs",
+    config = function()
+      -- Enable FlyMode: press the closing bracket key to jump to the next closing bracket
+      vim.g.AutoPairsFlyMode = 1
+      -- Don't auto-pair in these filetypes
+      vim.g.AutoPairsShortcutToggle = '<M-p>'
+    end,
+  },
+
   -- Theme plugins
   { "rebelot/kanagawa.nvim" },
   { "EdenEast/nightfox.nvim" },
