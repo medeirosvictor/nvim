@@ -286,14 +286,42 @@ local plugins = {
 
   { "mg979/vim-visual-multi" },
 
+  {
+    "ej-shafran/compile-mode.nvim",
+    version = "^5.0.0",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      vim.g.compile_mode = {
+        default_command = {
+          cpp = "c++ -std=c++23 -Wall -o %:r % && ./%:r",
+          go  = "go build ./... && go run .",
+        },
+        auto_jump_to_first_error = true,
+        auto_scroll = true,
+        ask_about_save = false,
+      }
+
+      vim.keymap.set("n", "<leader>cc", "<cmd>Compile<CR>",    { desc = "Compile" })
+      vim.keymap.set("n", "<leader>cr", "<cmd>Recompile<CR>",  { desc = "Recompile" })
+      vim.keymap.set("n", "<leader>ce", "<cmd>NextError<CR>",  { desc = "Next compile error" })
+      vim.keymap.set("n", "<leader>cE", "<cmd>PrevError<CR>",  { desc = "Prev compile error" })
+    end,
+  },
+
   -- Auto-pairs for brackets
   {
-    "jiangmiao/auto-pairs",
+    "windwp/nvim-autopairs",
+    event = "InsertEnter",
     config = function()
-      -- Enable FlyMode: press the closing bracket key to jump to the next closing bracket
-      vim.g.AutoPairsFlyMode = 1
-      -- Don't auto-pair in these filetypes
-      vim.g.AutoPairsShortcutToggle = '<M-p>'
+      require("nvim-autopairs").setup({
+        fast_wrap = { map = "<M-e>" },
+      })
+      -- Integrate with nvim-cmp
+      local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+      local ok, cmp = pcall(require, "cmp")
+      if ok then
+        cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+      end
     end,
   },
 
@@ -382,23 +410,18 @@ local plugins = {
   },
 
   {
-    "pablopunk/pi.nvim",
-    config = function()
-      require("pi").setup()
-      vim.keymap.set("n", "<leader>ai", ":PiAsk<CR>", { desc = "Ask pi" })
-      vim.keymap.set("v", "<leader>ai", ":PiAskSelection<CR>", { desc = "Ask pi (selection)" })
-    end,
-  },
-
-  {
     -- Pin 99 to a specific commit if it breaks:
     -- { "ThePrimeagen/99", commit = "abc123f" }
-    "medeirosvictor/v99",
+    dir = vim.fn.expand("~/Projects/v99"),
     dependencies = { "ThePrimeagen/99" },
     config = function()
       local v99 = require("v99")
-      
+
       v99.setup({
+        -- provider = require("v99.providers.pi"),       -- pi with configured default
+        -- provider = require("v99.providers.opencode"),  -- opencode with configured default
+        -- provider = require("v99.providers.claude"),    -- claude (needs Max/API key)
+        -- Switch at runtime with <leader>9c
         completion = {
           custom_rules = {
             "scratch/custom_rules/",
@@ -418,6 +441,10 @@ local plugins = {
       vim.keymap.set("n", "<leader>9s", function()
         v99.api.search()
       end)
+
+      vim.keymap.set("n", "<leader>9c", function()
+        require("99.extensions.telescope").select_provider()
+      end, { desc = "Switch AI provider" })
     end,
   },
 }
