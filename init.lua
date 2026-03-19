@@ -258,14 +258,11 @@ local plugins = {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     config = function()
-      -- New nvim-treesitter: highlight is built into Neovim (vim.treesitter.start())
-      -- Auto-install parsers if missing
-      local parsers = { "lua", "vim", "vimdoc", "javascript", "typescript", "python", "go", "rust", "html", "css", "json", "svelte" }
-      local installed = vim.fn.stdpath("data") .. "/lazy/nvim-treesitter/parser"
-      local ok = vim.fn.isdirectory(installed) == 1
-      if not ok then
-        vim.cmd("TSInstall " .. table.concat(parsers, " "))
-      end
+      require("nvim-treesitter.configs").setup({
+        ensure_installed = { "lua", "vim", "vimdoc", "javascript", "typescript", "python", "go", "rust", "html", "css", "json", "svelte" },
+        auto_install = true,
+        indent = { enable = true },
+      })
     end,
   },
 
@@ -308,6 +305,23 @@ local plugins = {
     end,
   },
 
+  -- Commenting
+  {
+    "numToStr/Comment.nvim",
+    config = function()
+      require("Comment").setup()
+
+      local api = require("Comment.api")
+      -- Normal mode: toggle current line
+      vim.keymap.set("n", "<C-/>", api.toggle.linewise.current, { desc = "Toggle comment" })
+      -- Visual mode: toggle selection
+      vim.keymap.set("v", "<C-/>", function()
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
+        api.toggle.linewise(vim.fn.visualmode())
+      end, { desc = "Toggle comment" })
+    end,
+  },
+
   -- Auto-pairs for brackets
   {
     "windwp/nvim-autopairs",
@@ -322,6 +336,32 @@ local plugins = {
       if ok then
         cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
       end
+    end,
+  },
+
+  -- On-save formatting
+  {
+    "stevearc/conform.nvim",
+    event = { "BufWritePre" },
+    config = function()
+      require("conform").setup({
+        formatters_by_ft = {
+          javascript  = { "prettier" },
+          typescript  = { "prettier" },
+          svelte      = { "prettier" },
+          html        = { "prettier" },
+          css         = { "prettier" },
+          json        = { "prettier" },
+          go          = { "gofmt" },
+          rust        = { "rustfmt" },
+          python      = { "black" },
+          lua         = { "stylua" },
+        },
+        format_on_save = {
+          timeout_ms = 500,
+          lsp_fallback = true, -- fall back to LSP formatter if tool not installed
+        },
+      })
     end,
   },
 
@@ -410,9 +450,7 @@ local plugins = {
   },
 
   {
-    -- Pin 99 to a specific commit if it breaks:
-    -- { "ThePrimeagen/99", commit = "abc123f" }
-    dir = vim.fn.expand("~/Projects/v99"),
+    "medeirosvictor/v99",
     dependencies = { "ThePrimeagen/99" },
     config = function()
       local v99 = require("v99")
@@ -423,9 +461,6 @@ local plugins = {
         -- provider = require("v99.providers.claude"),    -- claude (needs Max/API key)
         -- Switch at runtime with <leader>9c
         completion = {
-          custom_rules = {
-            "scratch/custom_rules/",
-          },
           source = "native",
         },
       })
