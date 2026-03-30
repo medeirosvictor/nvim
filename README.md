@@ -7,6 +7,7 @@ A modern Neovim setup using [lazy.nvim](https://github.com/folke/lazy.nvim) with
 - **Neovim 0.11+** — `apt install neovim` often gives older versions, so grab the latest from [GitHub releases](https://github.com/neovim/neovim/releases)
 - **git** — required for lazy.nvim plugin management
 - **C compiler** (gcc/clang) — required for treesitter parser compilation
+- **tree-sitter CLI** — required for nvim-treesitter v1.0+ parser compilation (`brew install tree-sitter-cli` or `npm install -g tree-sitter-cli`)
 - **A Nerd Font** — required for icons ([nerdfonts.com](https://www.nerdfonts.com/))
 
 ### Optional (for full LSP support)

@@ -40,3 +40,7 @@ opt.clipboard = "unnamedplus"
 opt.foldmethod = "expr"
 opt.foldexpr = "nvim_treesitter#foldexpr()"
 opt.foldenable = false
+
+-- Whitespace visibility
+opt.list = true
+opt.listchars = { space = "·", tab = "→ ", trail = "·" }

@@ -258,7 +258,7 @@ local plugins = {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter.configs").setup({
+      require("nvim-treesitter").setup({
         ensure_installed = { "lua", "vim", "vimdoc", "javascript", "typescript", "python", "go", "rust", "html", "css", "json", "svelte" },
         auto_install = true,
         indent = { enable = true },
@@ -282,6 +282,18 @@ local plugins = {
   },
 
   { "mg979/vim-visual-multi" },
+
+  {
+    "rmagatti/auto-session",
+    lazy = false,
+    config = function()
+      require("auto-session").setup({
+        auto_save = true,
+        auto_restore = true,
+        suppressed_dirs = { "~/", "~/Downloads" },
+      })
+    end,
+  },
 
   {
     "ej-shafran/compile-mode.nvim",
@@ -336,6 +348,23 @@ local plugins = {
       if ok then
         cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
       end
+    end,
+  },
+
+  -- Linting (flake8, pylint, etc.)
+  {
+    "mfussenegger/nvim-lint",
+    event = { "BufReadPost", "BufWritePost", "InsertLeave" },
+    config = function()
+      local lint = require("lint")
+      lint.linters_by_ft = {
+        python = { "flake8", "pylint" },
+      }
+      vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
+        callback = function()
+          lint.try_lint()
+        end,
+      })
     end,
   },
 
