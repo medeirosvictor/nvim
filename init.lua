@@ -15,6 +15,11 @@ vim.defer_fn(function()
   require("victor.core.keymaps")
 end, 0)
 
+-- Native Neovim 0.11+ commenting (replaces Comment.nvim)
+-- gc{motion} / gcc toggle comment; works in normal and visual mode
+vim.keymap.set("n", "<C-/>", "gcc", { remap = true, desc = "Toggle comment" })
+vim.keymap.set("v", "<C-/>", "gc",  { remap = true, desc = "Toggle comment" })
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
   vim.fn.system({
@@ -67,9 +72,12 @@ local decent_notes_spec = (function()
 end)()
 
 local plugins = {
+  -- ─── Shared deps ───────────────────────────────────────────────────────────
   { "nvim-lua/plenary.nvim" },
   { "nvim-tree/nvim-web-devicons" },
+  { "nvim-neotest/nvim-nio" }, -- shared by nvim-dap-ui and neotest
 
+  -- ─── File Explorer ─────────────────────────────────────────────────────────
   {
     "nvim-tree/nvim-tree.lua",
     dependencies = { "nvim-tree/nvim-web-devicons" },
@@ -196,88 +204,130 @@ local plugins = {
     end,
   },
 
-  { "neovim/nvim-lspconfig" },
-
+  -- ─── LSP ───────────────────────────────────────────────────────────────────
+  -- vtsls: replaces ts_ls — uses the official VS Code TS extension under the hood,
+  --        significantly faster on large TS codebases (e.g. next-wave's 35k+ lines).
+  -- basedpyright: stricter pyright fork — better Django/ruff/mypy alignment for
+  --        waveaccounting & next-accounting.
   {
-    "hrsh7th/nvim-cmp",
-    dependencies = {
-      "hrsh7th/cmp-nvim-lsp",
-      "hrsh7th/cmp-buffer",
-      "hrsh7th/cmp-path",
-      "hrsh7th/cmp-cmdline",
-      "saadparwaiz1/cmp_luasnip",
-      "L3MON4D3/LuaSnip",
-    },
+    "neovim/nvim-lspconfig",
+    dependencies = { "saghen/blink.cmp" },
     config = function()
-      local cmp = require("cmp")
-      local luasnip = require("luasnip")
-      local cmp_nvim_lsp = require("cmp_nvim_lsp")
-
-      local capabilities = vim.tbl_deep_extend(
-        "force",
-        {},
-        vim.lsp.protocol.make_client_capabilities(),
-        cmp_nvim_lsp.default_capabilities()
-      )
+      local capabilities = require("blink.cmp").get_lsp_capabilities()
       capabilities.textDocument.foldingRange = {
         dynamicRegistration = false,
         lineFoldingOnly = true,
       }
 
-      local servers = { "ts_ls", "pyright", "gopls", "clangd", "rust_analyzer", "svelte" }
+      local servers = { "vtsls", "basedpyright", "gopls", "clangd", "rust_analyzer", "svelte" }
       for _, server in ipairs(servers) do
         vim.lsp.config(server, { capabilities = capabilities })
         vim.lsp.enable(server)
       end
 
-      vim.diagnostic.config({ virtual_text = true, signs = true, float = { border = "rounded" } })
+      vim.diagnostic.config({
+        virtual_text = false,  -- disable inline text; use <leader>de or Trouble to see details
+        signs        = true,   -- keep gutter squiggly signs (E/W/I/H)
+        underline    = true,   -- keep the underline squiggles on the code itself
+        float        = { border = "rounded" },
+      })
 
       vim.api.nvim_create_autocmd("LspAttach", {
         callback = function(args)
           local buf = args.buf
-          vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = buf, desc = "Go to definition" })
-          vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = buf, desc = "Hover" })
-          vim.keymap.set("n", "gr", vim.lsp.buf.references, { buffer = buf, desc = "Go to references" })
-          vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { buffer = buf, desc = "Rename" })
-          vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { buffer = buf, desc = "Code action" })
+          vim.keymap.set("n", "gd", vim.lsp.buf.definition,    { buffer = buf, desc = "Go to definition" })
+          vim.keymap.set("n", "K",  vim.lsp.buf.hover,         { buffer = buf, desc = "Hover" })
+          vim.keymap.set("n", "gr", vim.lsp.buf.references,    { buffer = buf, desc = "Go to references" })
+          vim.keymap.set("n", "gD", vim.lsp.buf.declaration,   { buffer = buf, desc = "Go to declaration" })
+          vim.keymap.set("n", "gi", vim.lsp.buf.implementation,{ buffer = buf, desc = "Go to implementation" })
+          -- <leader>rn → inc-rename.nvim (global keymap, live preview)
+          -- <leader>ca → actions-preview.nvim (global keymap, shows diff before apply)
         end,
-      })
-
-      cmp.setup({
-        snippet = {
-          expand = function(args)
-            luasnip.lsp_expand(args.body)
-          end,
-        },
-        mapping = cmp.mapping.preset.insert({
-          ["<C-Space>"] = cmp.mapping.complete(),
-          ["<CR>"] = cmp.mapping.confirm({ select = true }),
-          ["<Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_next_item()
-            elseif luasnip.expand_or_jumpable() then
-              luasnip.expand_or_jump()
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
-        }),
-        sources = cmp.config.sources(
-          { { name = "nvim_lsp" }, { name = "luasnip" }, { name = "path" } },
-          { { name = "buffer" } }
-        ),
       })
     end,
   },
 
+  -- Mason: install / update LSP servers, formatters, linters inside Neovim
+  {
+    "williamboman/mason.nvim",
+    config = function()
+      require("mason").setup({ ui = { border = "rounded" } })
+    end,
+  },
+  {
+    "williamboman/mason-lspconfig.nvim",
+    dependencies = { "williamboman/mason.nvim", "neovim/nvim-lspconfig" },
+    config = function()
+      require("mason-lspconfig").setup({
+        -- run :Mason to install these (automatic_installation = false keeps it opt-in)
+        ensure_installed = { "vtsls", "basedpyright", "gopls", "rust_analyzer", "svelte" },
+        automatic_installation = false,
+      })
+    end,
+  },
+
+  -- ─── Completion ────────────────────────────────────────────────────────────
+  -- LuaSnip kept as snippet engine; blink.cmp uses it via snippets.preset = "luasnip"
+  {
+    "L3MON4D3/LuaSnip",
+    version = "v2.*",
+    build = "make install_jsregexp",
+  },
+
+  -- blink.cmp: Rust-powered completion — replaces nvim-cmp + all its source plugins.
+  -- Sources: LSP, path, LuaSnip snippets, buffer words. Cmdline completion built-in.
+  {
+    "saghen/blink.cmp",
+    version = "1.*",
+    dependencies = { "L3MON4D3/LuaSnip" },
+    opts = {
+      keymap = { preset = "default" },
+      appearance = { nerd_font_variant = "mono" },
+      sources = {
+        default = { "lsp", "path", "snippets", "buffer" },
+      },
+      snippets  = { preset = "luasnip" },
+      completion = {
+        documentation = { auto_show = true, auto_show_delay_ms = 200 },
+        accept        = { auto_brackets = { enabled = true } },
+      },
+    },
+  },
+
+  -- ─── Treesitter ────────────────────────────────────────────────────────────
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
+    dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
     config = function()
       require("nvim-treesitter").setup({
-        ensure_installed = { "lua", "vim", "vimdoc", "javascript", "typescript", "python", "go", "rust", "html", "css", "json", "svelte" },
+        ensure_installed = {
+          "lua", "vim", "vimdoc",
+          "javascript", "typescript", "tsx", "graphql",
+          "python", "go", "rust",
+          "html", "css", "json", "svelte",
+        },
         auto_install = true,
         indent = { enable = true },
+      })
+
+      -- textobjects (v1.0 API): configured via nvim-treesitter-textobjects directly
+      require("nvim-treesitter-textobjects").setup({
+        select = {
+          enable    = true,
+          lookahead = true,
+          keymaps   = {
+            ["af"] = "@function.outer", ["if"] = "@function.inner",
+            ["ac"] = "@class.outer",    ["ic"] = "@class.inner",
+            ["aa"] = "@parameter.outer", ["ia"] = "@parameter.inner",
+          },
+        },
+        move = {
+          enable    = true,
+          set_jumps = true,
+          goto_next_start     = { ["]f"] = "@function.outer", ["]c"] = "@class.outer" },
+          goto_previous_start = { ["[f"] = "@function.outer", ["[c"] = "@class.outer" },
+        },
       })
     end,
   },
@@ -309,15 +359,96 @@ local plugins = {
     end,
   },
 
+  -- ─── Editing ───────────────────────────────────────────────────────────────
   { "mg979/vim-visual-multi" },
 
+  {
+    "windwp/nvim-autopairs",
+    event = "InsertEnter",
+    config = function()
+      require("nvim-autopairs").setup({
+        fast_wrap = { map = "<M-e>" },
+      })
+      -- Note: no nvim-cmp integration needed — blink.cmp handles bracket auto-closing natively
+    end,
+  },
+
+  -- nvim-surround: wrap motions/selections with quotes, brackets, tags, etc.
+  --   ys{motion}{char}  add surround  (e.g. ysiw"  wraps word with "")
+  --   ds{char}          delete surround
+  --   cs{old}{new}      change surround
+  --   S{char}           surround in visual mode
+  {
+    "kylechui/nvim-surround",
+    event = "VeryLazy",
+    config = function()
+      require("nvim-surround").setup()
+    end,
+  },
+
+  -- ─── Rename / Code Actions ─────────────────────────────────────────────────
+  -- inc-rename: live-preview rename — type and see all changes highlighted before confirming
+  {
+    "smjonas/inc-rename.nvim",
+    config = function()
+      require("inc_rename").setup()
+      vim.keymap.set("n", "<leader>rn", function()
+        return ":IncRename " .. vim.fn.expand("<cword>")
+      end, { expr = true, desc = "Rename symbol (live preview)" })
+    end,
+  },
+
+  -- actions-preview: shows a diff preview of what each code action will do before applying
+  {
+    "aznhe21/actions-preview.nvim",
+    config = function()
+      require("actions-preview").setup({
+        telescope = { sorting_strategy = "ascending" },
+      })
+      vim.keymap.set({ "v", "n" }, "<leader>ca",
+        require("actions-preview").code_actions,
+        { desc = "Code action (preview)" })
+    end,
+  },
+
+  -- ─── Diagnostics ───────────────────────────────────────────────────────────
+  -- trouble.nvim v3: navigable diagnostics panel — replaces the quickfix/loclist workflow
+  {
+    "folke/trouble.nvim",
+    opts = { use_diagnostic_signs = true },
+    cmd  = "Trouble",
+    keys = {
+      { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>",              desc = "Diagnostics (Trouble)" },
+      { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Buffer diagnostics" },
+      { "<leader>xs", "<cmd>Trouble symbols toggle<cr>",                   desc = "Symbols (Trouble)" },
+      { "<leader>xq", "<cmd>Trouble qflist toggle<cr>",                    desc = "Quickfix list" },
+      { "<leader>xl", "<cmd>Trouble loclist toggle<cr>",                   desc = "Location list" },
+    },
+  },
+
+  -- ─── Symbol Outline ────────────────────────────────────────────────────────
+  -- aerial.nvim: sidebar / float showing all symbols; {/} navigate between them per-buffer
+  {
+    "stevearc/aerial.nvim",
+    dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons" },
+    config = function()
+      require("aerial").setup({
+        on_attach = function(bufnr)
+          vim.keymap.set("n", "{", "<cmd>AerialPrev<CR>", { buffer = bufnr, desc = "Prev symbol" })
+          vim.keymap.set("n", "}", "<cmd>AerialNext<CR>", { buffer = bufnr, desc = "Next symbol" })
+        end,
+      })
+      vim.keymap.set("n", "<leader>ao", "<cmd>AerialToggle!<CR>", { desc = "Toggle symbol outline" })
+    end,
+  },
+  -- ─── Sessions ──────────────────────────────────────────────────────────────
   {
     "rmagatti/auto-session",
     lazy = false,
     config = function()
       require("auto-session").setup({
-        auto_save = true,
-        auto_restore = true,
+        auto_save       = true,
+        auto_restore    = true,
         suppressed_dirs = { "~/", "~/Downloads" },
       })
     end,
@@ -345,74 +476,44 @@ local plugins = {
     end,
   },
 
-  -- Commenting
-  {
-    "numToStr/Comment.nvim",
-    config = function()
-      require("Comment").setup()
-
-      local api = require("Comment.api")
-      -- Normal mode: toggle current line
-      vim.keymap.set("n", "<C-/>", api.toggle.linewise.current, { desc = "Toggle comment" })
-      -- Visual mode: toggle selection
-      vim.keymap.set("v", "<C-/>", function()
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
-        api.toggle.linewise(vim.fn.visualmode())
-      end, { desc = "Toggle comment" })
-    end,
-  },
-
-  -- Auto-pairs for brackets
-  {
-    "windwp/nvim-autopairs",
-    event = "InsertEnter",
-    config = function()
-      require("nvim-autopairs").setup({
-        fast_wrap = { map = "<M-e>" },
-      })
-      -- Integrate with nvim-cmp
-      local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-      local ok, cmp = pcall(require, "cmp")
-      if ok then
-        cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
-      end
-    end,
-  },
-
-  -- Linting (flake8, pylint, etc.)
+  -- ─── Linting ───────────────────────────────────────────────────────────────
+  -- ruff: replaces flake8+pylint — matches pyproject.toml in waveaccounting/next-accounting
+  -- eslint_d: daemon-mode eslint — matches ESLint flat config in next-wave
   {
     "mfussenegger/nvim-lint",
     event = { "BufReadPost", "BufWritePost", "InsertLeave" },
     config = function()
       local lint = require("lint")
       lint.linters_by_ft = {
-        python = { "flake8", "pylint" },
+        python     = { "ruff" },
+        javascript = { "eslint_d" },
+        typescript = { "eslint_d" },
+        svelte     = { "eslint_d" },
       }
       vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
-        callback = function()
-          lint.try_lint()
-        end,
+        callback = function() lint.try_lint() end,
       })
     end,
   },
 
-  -- On-save formatting
+  -- ─── Formatting ────────────────────────────────────────────────────────────
+  -- ruff_format replaces black — matches [tool.ruff] in both Python repos
   {
     "stevearc/conform.nvim",
     event = { "BufWritePre" },
     config = function()
       require("conform").setup({
         formatters_by_ft = {
-          javascript  = { "prettier" },
-          typescript  = { "prettier" },
-          svelte      = { "prettier" },
-          html        = { "prettier" },
-          css         = { "prettier" },
-          json        = { "prettier" },
-          go          = { "gofmt" },
-          rust        = { "rustfmt" },
-          python      = { "black" },
-          lua         = { "stylua" },
+          javascript = { "prettier" },
+          typescript = { "prettier" },
+          svelte     = { "prettier" },
+          html       = { "prettier" },
+          css        = { "prettier" },
+          json       = { "prettier" },
+          go         = { "gofmt" },
+          rust       = { "rustfmt" },
+          python     = { "ruff_format" }, -- was "black"; matches pyproject.toml
+          lua        = { "stylua" },
         },
         formatters = {
           prettier = {
@@ -423,17 +524,123 @@ local plugins = {
           },
         },
         format_on_save = {
-          timeout_ms = 500,
-          lsp_fallback = true, -- fall back to LSP formatter if tool not installed
+          timeout_ms   = 500,
+          lsp_fallback = true,
         },
       })
     end,
   },
 
-  -- Theme plugins
+  -- ─── Debugging (DAP) ───────────────────────────────────────────────────────
+  -- nvim-dap-python uses debugpy — supports remote attach for Django in Docker/Okteto.
+  -- See :help dap for remote attach config (host/port via DJANGO_DEBUGPY_PORT).
+  {
+    "mfussenegger/nvim-dap",
+    dependencies = {
+      "rcarriga/nvim-dap-ui",
+      "nvim-neotest/nvim-nio",
+      "theHamsta/nvim-dap-virtual-text",
+      "mfussenegger/nvim-dap-python",
+    },
+    config = function()
+      local dap   = require("dap")
+      local dapui = require("dapui")
+
+      require("nvim-dap-virtual-text").setup({ commented = true })
+      dapui.setup()
+      require("dap-python").setup("python3")
+
+      dap.listeners.after.event_initialized["dapui_config"]  = function() dapui.open() end
+      dap.listeners.before.event_terminated["dapui_config"]  = function() dapui.close() end
+      dap.listeners.before.event_exited["dapui_config"]      = function() dapui.close() end
+
+      vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint,                                             { desc = "Toggle breakpoint" })
+      vim.keymap.set("n", "<leader>dB", function() dap.set_breakpoint(vim.fn.input("Condition: ")) end,   { desc = "Conditional breakpoint" })
+      vim.keymap.set("n", "<leader>dc", dap.continue,                                                     { desc = "DAP continue" })
+      vim.keymap.set("n", "<leader>do", dap.step_over,                                                    { desc = "Step over" })
+      vim.keymap.set("n", "<leader>di", dap.step_into,                                                    { desc = "Step into" })
+      vim.keymap.set("n", "<leader>dO", dap.step_out,                                                     { desc = "Step out" })
+      vim.keymap.set("n", "<leader>du", dapui.toggle,                                                     { desc = "Toggle DAP UI" })
+      vim.keymap.set("n", "<leader>dr", dap.repl.open,                                                    { desc = "DAP REPL" })
+    end,
+  },
+
+  -- ─── Testing ───────────────────────────────────────────────────────────────
+  -- neotest-python: pytest adapter (waveaccounting, next-accounting)
+  -- neotest-vitest: Vitest adapter (next-wave)
+  {
+    "nvim-neotest/neotest",
+    dependencies = {
+      "nvim-neotest/nvim-nio",
+      "nvim-lua/plenary.nvim",
+      "antoinemadec/FixCursorHold.nvim",
+      "nvim-treesitter/nvim-treesitter",
+      "nvim-neotest/neotest-python",
+      "marilari88/neotest-vitest",
+    },
+    config = function()
+      require("neotest").setup({
+        adapters = {
+          require("neotest-python")({ dap = { justMyCode = false }, python = "python3" }),
+          require("neotest-vitest"),
+        },
+      })
+      -- <leader>tO and <leader>tP use capital letters to avoid conflict with <leader>to (new tab)
+      vim.keymap.set("n", "<leader>tt", function() require("neotest").run.run() end,                     { desc = "Run nearest test" })
+      vim.keymap.set("n", "<leader>tf", function() require("neotest").run.run(vim.fn.expand("%")) end,   { desc = "Run test file" })
+      vim.keymap.set("n", "<leader>ts", function() require("neotest").summary.toggle() end,              { desc = "Test summary" })
+      vim.keymap.set("n", "<leader>tO", function() require("neotest").output.open({ enter = true }) end, { desc = "Test output" })
+      vim.keymap.set("n", "<leader>tP", function() require("neotest").output_panel.toggle() end,         { desc = "Test output panel" })
+      vim.keymap.set("n", "<leader>td", function() require("neotest").run.run({ strategy = "dap" }) end, { desc = "Debug nearest test" })
+    end,
+  },
+
+  -- ─── Git ───────────────────────────────────────────────────────────────────
+  {
+    "sindrets/diffview.nvim",
+    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewToggleFiles", "DiffviewFileHistory" },
+    config = function()
+      require("diffview").setup()
+      vim.keymap.set("n", "<leader>gd", "<cmd>DiffviewOpen<CR>",         { desc = "Diff view open" })
+      vim.keymap.set("n", "<leader>gD", "<cmd>DiffviewClose<CR>",        { desc = "Diff view close" })
+      vim.keymap.set("n", "<leader>gH", "<cmd>DiffviewFileHistory %<CR>",{ desc = "File git history" })
+    end,
+  },
+
+  -- ─── QoL Utilities (snacks.nvim) ───────────────────────────────────────────
+  -- snacks.notifier    : replaces vim.notify with a modern notification UI
+  -- snacks.indent      : indent guides
+  -- snacks.words       : highlight all occurrences of the word under cursor
+  -- snacks.lazygit     : lazygit in a managed float (<leader>gg / <leader>gl)
+  -- snacks.bigfile     : disables heavy plugins for files >1.5 MB (e.g. generated GraphQL)
+  -- snacks.scroll      : disabled — conflicts with custom 5-line j/k jumps
+  -- snacks.statuscolumn: disabled — conflicts with nvim-ufo fold column
+  {
+    "folke/snacks.nvim",
+    priority = 1000,
+    lazy     = false,
+    opts = {
+      notifier     = { enabled = true, timeout = 3000 },
+      indent       = { enabled = true },
+      words        = { enabled = true },
+      lazygit      = { enabled = true },
+      bigfile      = { enabled = true },
+      scroll       = { enabled = false },
+      statuscolumn = { enabled = false },
+    },
+    config = function(_, opts)
+      require("snacks").setup(opts)
+      vim.keymap.set("n", "<leader>gg", function() Snacks.lazygit() end,     { desc = "Open Lazygit" })
+      vim.keymap.set("n", "<leader>gl", function() Snacks.lazygit.log() end, { desc = "Lazygit log" })
+    end,
+  },
+
+  -- ─── Themes ────────────────────────────────────────────────────────────────
   { "rebelot/kanagawa.nvim" },
   { "EdenEast/nightfox.nvim" },
   { "catppuccin/nvim", name = "catppuccin" },
+  { "ellisonleao/gruvbox.nvim" },
+  { "loctvl842/monokai-pro.nvim" },
   {
     "zaldih/themery.nvim",
     lazy = false,
@@ -502,18 +709,56 @@ local plugins = {
               vim.opt.background = "light"
             ]],
           },
+          {
+            name = "Gruvbox Dark",
+            colorscheme = "gruvbox",
+            before = [[
+              require("gruvbox").setup({
+                contrast = "hard",
+                italic = { strings = false, operators = false },
+              })
+              vim.opt.background = "dark"
+            ]],
+          },
+          {
+            name = "Gruvbox Light",
+            colorscheme = "gruvbox",
+            before = [[
+              require("gruvbox").setup({
+                contrast = "hard",
+                italic = { strings = false, operators = false },
+              })
+              vim.opt.background = "light"
+            ]],
+          },
+          {
+            name = "Monokai Pro Spectrum",
+            colorscheme = "monokai-pro",
+            before = [[ require("monokai-pro").setup({ filter = "spectrum" }) ]],
+          },
+          {
+            name = "Monokai Pro Classic",
+            colorscheme = "monokai-pro",
+            before = [[ require("monokai-pro").setup({ filter = "classic" }) ]],
+          },
+          {
+            name = "Monokai Pro Octagon",
+            colorscheme = "monokai-pro",
+            before = [[ require("monokai-pro").setup({ filter = "octagon" }) ]],
+          },
         },
         livePreview = true,
       })
-      
-      -- Set default theme (terafox)
-      vim.cmd("colorscheme kanagawa-wave")
-      
-      -- Keymap to switch themes
+
+      -- Default theme on startup (Themery remembers your pick after first manual switch)
+      require("monokai-pro").setup({ filter = "spectrum" })
+      vim.cmd("colorscheme monokai-pro")
+
       vim.keymap.set("n", "<leader>ct", ":Themery<CR>", { desc = "Switch theme" })
     end,
   },
 
+  -- ─── AI ────────────────────────────────────────────────────────────────────
   {
     "medeirosvictor/v99",
     dependencies = { "ThePrimeagen/99" },
@@ -530,18 +775,9 @@ local plugins = {
         },
       })
 
-      vim.keymap.set("v", "<leader>9v", function()
-        v99.api.visual()
-      end)
-
-      vim.keymap.set("n", "<leader>9x", function()
-        v99.api.stop_all_requests()
-      end)
-
-      vim.keymap.set("n", "<leader>9s", function()
-        v99.api.search()
-      end)
-
+      vim.keymap.set("v", "<leader>9v", function() v99.api.visual() end)
+      vim.keymap.set("n", "<leader>9x", function() v99.api.stop_all_requests() end)
+      vim.keymap.set("n", "<leader>9s", function() v99.api.search() end)
       vim.keymap.set("n", "<leader>9c", function()
         require("99.extensions.telescope").select_provider()
       end, { desc = "Switch AI provider" })

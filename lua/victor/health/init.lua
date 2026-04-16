@@ -36,15 +36,21 @@ M.check = function()
     })
   end
 
-  -- Optional: language servers / runtimes
+  -- Optional: language servers / runtimes / formatters / linters
   local optional = {
-    { cmd = "node",           reason = "ts_ls, pyright, eslint LSPs" },
-    { cmd = "npm",            reason = "installing LSP servers via npm" },
-    { cmd = "python3",        reason = "pyright LSP" },
-    { cmd = "go",             reason = "gopls LSP" },
-    { cmd = "cargo",          reason = "rust-analyzer LSP" },
-    { cmd = "ripgrep",        alt = "rg", reason = "telescope live_grep" },
-    { cmd = "fd",             alt = "fdfind", reason = "telescope find_files (faster)" },
+    { cmd = "node",        reason = "vtsls, basedpyright, svelte LSPs" },
+    { cmd = "npm",         reason = "installing LSP servers (vtsls, svelte)" },
+    { cmd = "python3",     reason = "basedpyright LSP + debugpy + neotest-python" },
+    { cmd = "go",          reason = "gopls LSP" },
+    { cmd = "cargo",       reason = "rust-analyzer LSP" },
+    { cmd = "ruff",        reason = "Python linter + formatter (nvim-lint + conform)" },
+    { cmd = "eslint_d",    reason = "TypeScript/JS linter (nvim-lint)" },
+    { cmd = "prettier",    reason = "TS/JS/CSS/JSON formatter (conform)" },
+    { cmd = "stylua",      reason = "Lua formatter (conform)" },
+    { cmd = "debugpy",     alt = "python3", reason = "Python DAP adapter (nvim-dap-python)" },
+    { cmd = "lazygit",     reason = "snacks.lazygit integration" },
+    { cmd = "ripgrep",     alt = "rg",      reason = "telescope live_grep" },
+    { cmd = "fd",          alt = "fdfind",  reason = "telescope find_files (faster)" },
   }
   for _, dep in ipairs(optional) do
     local found = vim.fn.executable(dep.cmd) == 1

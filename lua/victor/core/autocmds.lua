@@ -14,12 +14,7 @@ autocmd("BufEnter", {
   end,
 })
 
-autocmd("TermClose", {
-  pattern = "*lazygit",
-  callback = function()
-    vim.cmd("bw!")
-  end,
-})
+-- Note: lazygit TermClose autocmd removed — snacks.lazygit manages its own float lifecycle.
 
 autocmd("VimEnter", {
   callback = function()
