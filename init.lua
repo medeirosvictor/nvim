@@ -172,6 +172,78 @@ local plugins = {
     end,
   },
 
+  -- bufferline: tab bar showing open buffers; harpoon marks shown as pinned tabs
+  {
+    "akinsho/bufferline.nvim",
+    version = "*",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      require("bufferline").setup({
+        options = {
+          mode              = "buffers",
+          diagnostics       = "nvim_lsp",
+          separator_style   = "slant",
+          show_close_icon   = false,
+          show_buffer_close_icons = true,
+          offsets = {
+            { filetype = "NvimTree", text = "EXPLORER", highlight = "Directory", separator = true },
+          },
+        },
+      })
+      vim.keymap.set("n", "<S-l>", "<cmd>BufferLineCycleNext<CR>", { desc = "Next buffer tab" })
+      vim.keymap.set("n", "<S-h>", "<cmd>BufferLineCyclePrev<CR>", { desc = "Prev buffer tab" })
+      vim.keymap.set("n", "<leader>bp", "<cmd>BufferLineTogglePin<CR>", { desc = "Pin/unpin buffer" })
+      vim.keymap.set("n", "<leader>bx", "<cmd>BufferLinePickClose<CR>", { desc = "Pick buffer to close" })
+      vim.keymap.set("n", "<leader>q", "<cmd>bd<CR>", { desc = "Close current buffer" })
+      vim.keymap.set("n", "<leader>ba", "<cmd>%bd|e#|bd#|NvimTreeOpen<CR>", { desc = "Close all buffers" })
+      vim.keymap.set("n", "<leader>bo", "<cmd>BufferLineCloseOthers<CR>", { desc = "Close other buffers" })
+    end,
+  },
+
+  -- alpha-nvim: startup dashboard
+  {
+    "goolord/alpha-nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      local alpha = require("alpha")
+      local dashboard = require("alpha.themes.dashboard")
+
+      dashboard.section.header.val = {
+        [[                                                    ]],
+        [[ ███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗]],
+        [[ ████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║]],
+        [[ ██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║]],
+        [[ ██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║]],
+        [[ ██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║]],
+        [[ ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝]],
+        [[                                                    ]],
+      }
+
+      dashboard.section.buttons.val = {
+        dashboard.button("f", "󰈞  Find file",       ":Telescope find_files<CR>"),
+        dashboard.button("g", "󰊄  Live grep",        ":Telescope live_grep<CR>"),
+        dashboard.button("r", "  Recent files",     ":Telescope oldfiles<CR>"),
+        dashboard.button("s", "  Restore session",  ":SessionRestore<CR>"),
+        dashboard.button("h", "󰛢  Harpoon",          ":lua require('harpoon').ui:toggle_quick_menu(require('harpoon'):list())<CR>"),
+        dashboard.button("m", "  Mason",            ":Mason<CR>"),
+        dashboard.button("l", "󰒲  Lazy",             ":Lazy<CR>"),
+        dashboard.button("q", "  Quit",             ":qa<CR>"),
+      }
+
+      dashboard.section.footer.val = "Victor's Neovim"
+
+      alpha.setup(dashboard.opts)
+
+      -- Don't open NvimTree on dashboard
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "AlphaReady",
+        callback = function()
+          vim.cmd("NvimTreeClose")
+        end,
+      })
+    end,
+  },
+
   {
     "akinsho/toggleterm.nvim",
     config = function()
