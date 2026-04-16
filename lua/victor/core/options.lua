@@ -1,7 +1,7 @@
 local opt = vim.opt
 local g = vim.g
 
-opt.relativenumber = true
+opt.relativenumber = false
 opt.number = true
 
 opt.tabstop = 2
@@ -36,10 +36,11 @@ g.mapleader = " "
 
 opt.clipboard = "unnamedplus"
 
--- Treesitter-based fold
-opt.foldmethod = "expr"
-opt.foldexpr = "nvim_treesitter#foldexpr()"
-opt.foldenable = false
+-- Folding (managed by nvim-ufo)
+opt.foldcolumn = "1"
+opt.foldlevel = 99
+opt.foldlevelstart = 99
+opt.foldenable = true
 
 -- Whitespace visibility
 opt.list = true

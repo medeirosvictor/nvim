@@ -1,6 +1,6 @@
 local keymap = vim.keymap.set
 
-keymap("n", "<C-f>", ":lua require('telescope.builtin').current_buffer_fuzzy_find()<CR>", { noremap = true, silent = true, desc = "Find text in buffer" })
+keymap("n", "<C-f>", ":lua require('telescope.builtin').live_grep()<CR>", { noremap = true, silent = true, desc = "Find text in files" })
 keymap("n", "<C-F>", ":lua require('telescope.builtin').live_grep()<CR>", { noremap = true, silent = true, desc = "Find text in files" })
 keymap("n", "<C-p>", ":lua require('telescope.builtin').find_files()<CR>", { noremap = true, silent = true, desc = "Find files" })
 keymap("n", "<C-b>", ":NvimTreeToggle<CR>", { noremap = true, silent = true, desc = "Toggle sidebar" })
@@ -50,7 +50,6 @@ keymap("x", "<leader>r", '"zy:%s/\\V<C-r>z//g<left><left>', { noremap = true, si
 -- Diagnostics
 keymap("n", "<leader>de", vim.diagnostic.open_float, { noremap = true, silent = true, desc = "Show full diagnostic" })
 
--- Folding
-keymap("n", "<leader>zf", function()
-  vim.cmd("normal! z\r")
-end, { noremap = true, silent = true, desc = "Open fold at cursor" })
+-- Folding (nvim-ufo)
+keymap("n", "zR", require("ufo").openAllFolds, { desc = "Open all folds" })
+keymap("n", "zM", require("ufo").closeAllFolds, { desc = "Close all folds" })

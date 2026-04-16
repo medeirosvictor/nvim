@@ -125,13 +125,25 @@ local plugins = {
     "nvim-telescope/telescope.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
-      require("telescope").setup({
-        defaults = {
-          file_ignore_patterns = { "node_modules", ".git", "dist", "build" },
-          mappings = { i = { ["<esc>"] = require("telescope.actions").close } },
-        },
-        pickers = { find_files = { theme = "dropdown" } },
-      })
+        require("telescope").setup({
+          defaults = {
+            file_ignore_patterns = { "node_modules", "dist", "build", ".venv" },
+            mappings = { i = { ["<esc>"] = require("telescope.actions").close } },
+          },
+          pickers = {
+            find_files = {
+              theme = "dropdown",
+              hidden = true,
+              no_ignore = true,
+              no_ignore_parent = true,
+            },
+            live_grep = {
+              additional_args = function()
+                return { "--hidden", "--no-ignore", "--no-ignore-parent" }
+              end,
+            },
+          },
+        })
     end,
   },
 
@@ -207,6 +219,10 @@ local plugins = {
         vim.lsp.protocol.make_client_capabilities(),
         cmp_nvim_lsp.default_capabilities()
       )
+      capabilities.textDocument.foldingRange = {
+        dynamicRegistration = false,
+        lineFoldingOnly = true,
+      }
 
       local servers = { "ts_ls", "pyright", "gopls", "clangd", "rust_analyzer", "svelte" }
       for _, server in ipairs(servers) do
@@ -278,6 +294,18 @@ local plugins = {
     "folke/which-key.nvim",
     config = function()
       require("which-key").setup({ win = { border = "single" } })
+    end,
+  },
+
+  {
+    "kevinhwang91/nvim-ufo",
+    dependencies = { "kevinhwang91/promise-async" },
+    config = function()
+      require("ufo").setup({
+        provider_selector = function(bufnr, filetype, buftype)
+          return { "lsp", "indent" }
+        end,
+      })
     end,
   },
 
@@ -386,6 +414,14 @@ local plugins = {
           python      = { "black" },
           lua         = { "stylua" },
         },
+        formatters = {
+          prettier = {
+            command = function()
+              local local_bin = vim.fn.findfile("node_modules/.bin/prettier", vim.fn.getcwd() .. ";")
+              return local_bin ~= "" and local_bin or "prettier"
+            end,
+          },
+        },
         format_on_save = {
           timeout_ms = 500,
           lsp_fallback = true, -- fall back to LSP formatter if tool not installed
@@ -406,7 +442,7 @@ local plugins = {
         themes = {
           {
             name = "Kanagawa Wave",
-            colorscheme = "kanagawa",
+            colorscheme = "kanagawa-wave",
             before = [[
               require("kanagawa").setup({
                 compile = false,
@@ -471,7 +507,7 @@ local plugins = {
       })
       
       -- Set default theme (terafox)
-      vim.cmd("colorscheme terafox")
+      vim.cmd("colorscheme kanagawa-wave")
       
       -- Keymap to switch themes
       vim.keymap.set("n", "<leader>ct", ":Themery<CR>", { desc = "Switch theme" })
