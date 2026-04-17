@@ -279,8 +279,6 @@ local plugins = {
   -- ─── LSP ───────────────────────────────────────────────────────────────────
   -- vtsls: replaces ts_ls — uses the official VS Code TS extension under the hood,
   --        significantly faster on large TS codebases (e.g. next-wave's 35k+ lines).
-  -- basedpyright: stricter pyright fork — better Django/ruff/mypy alignment for
-  --        waveaccounting & next-accounting.
   {
     "neovim/nvim-lspconfig",
     dependencies = { "saghen/blink.cmp" },
@@ -291,7 +289,7 @@ local plugins = {
         lineFoldingOnly = true,
       }
 
-      local servers = { "vtsls", "basedpyright", "gopls", "clangd", "rust_analyzer", "svelte" }
+      local servers = { "vtsls", "gopls", "clangd", "rust_analyzer", "svelte" }
       for _, server in ipairs(servers) do
         vim.lsp.config(server, { capabilities = capabilities })
         vim.lsp.enable(server)
@@ -332,7 +330,7 @@ local plugins = {
     config = function()
       require("mason-lspconfig").setup({
         -- run :Mason to install these (automatic_installation = false keeps it opt-in)
-        ensure_installed = { "vtsls", "basedpyright", "gopls", "rust_analyzer", "svelte" },
+        ensure_installed = { "vtsls", "gopls", "rust_analyzer", "svelte" },
         automatic_installation = false,
       })
     end,
