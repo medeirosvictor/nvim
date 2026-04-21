@@ -85,7 +85,7 @@ local plugins = {
       require("nvim-tree").setup({
         disable_netrw = true,
         hijack_netrw = true,
-        -- Removed: open_on_setup_file is deprecated
+        sync_root_with_cwd = true,   -- re-root tree when cwd changes (e.g. project.nvim switch)
         update_focused_file = { enable = true, update_cwd = false },
         filesystem_watchers = {
           ignore_dirs = { ".claude" },
@@ -155,6 +155,39 @@ local plugins = {
     end,
   },
 
+  -- project.nvim: project switcher — detects projects by .git / pyproject.toml / package.json etc.
+  -- <leader>fp: save session → pick project → cd → close buffers → restore session → open tree
+  {
+    "ahmedkhalf/project.nvim",
+    dependencies = { "nvim-telescope/telescope.nvim" },
+    config = function()
+      require("project_nvim").setup({
+        detection_methods = { "pattern", "lsp" },
+        patterns = { ".git", "pyproject.toml", "package.json", "go.mod", "Cargo.toml" },
+        show_hidden = false,
+        silent_chdir = true,
+      })
+      require("telescope").load_extension("projects")
+
+      -- After project.nvim cds into the new project:
+      -- close all buffers, restore that project's session, open the tree
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "ProjectChanged",
+        callback = function()
+          vim.cmd("%bd")
+          vim.cmd("SessionRestore")
+          vim.cmd("NvimTreeOpen")
+        end,
+      })
+
+      -- Save current session BEFORE opening the picker, then show it
+      vim.keymap.set("n", "<leader>fp", function()
+        vim.cmd("SessionSave")
+        vim.cmd("Telescope projects")
+      end, { desc = "Switch project" })
+    end,
+  },
+
   {
     "nvim-lualine/lualine.nvim",
     config = function()
@@ -163,7 +196,7 @@ local plugins = {
         sections = {
           lualine_a = { "mode" },
           lualine_b = { "branch", "diff", "diagnostics" },
-          lualine_c = { "filename" },
+          lualine_c = { { "filename", symbols = { modified = " ●" } } },
           lualine_x = { "encoding", "fileformat", "filetype" },
           lualine_y = { "progress" },
           lualine_z = { "location" },
@@ -183,6 +216,7 @@ local plugins = {
           mode              = "buffers",
           diagnostics       = "nvim_lsp",
           separator_style   = "slant",
+          modified_icon     = "●",
           show_close_icon   = false,
           show_buffer_close_icons = true,
           offsets = {
@@ -351,7 +385,10 @@ local plugins = {
     version = "1.*",
     dependencies = { "L3MON4D3/LuaSnip" },
     opts = {
-      keymap = { preset = "default" },
+      keymap = {
+        preset = "default",
+        ["<Tab>"] = { "accept", "fallback" },
+      },
       appearance = { nerd_font_variant = "mono" },
       sources = {
         default = { "lsp", "path", "snippets", "buffer" },

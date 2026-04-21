@@ -20,8 +20,8 @@ Run `:checkhealth victor` after first launch to see what's missing.
 
 | Tool | Purpose |
 |---|---|
-| `node` + `npm` | vtsls (TypeScript), basedpyright, svelte LSPs |
-| `python3` + `pip` | basedpyright, debugpy (DAP), neotest-python |
+| `node` + `npm` | vtsls (TypeScript), svelte LSPs |
+| `python3` + `pip` | debugpy (DAP), neotest-python |
 | `go` | gopls |
 | `cargo` | rust-analyzer |
 | `ruff` | Python linter + formatter (`pip install ruff`) |
@@ -45,10 +45,7 @@ brew install neovim
 # 2. Install dependencies
 brew install git ripgrep fd lazygit stylua tree-sitter
 npm install -g typescript-language-server vtsls prettier eslint_d
-pip install basedpyright ruff debugpy
-
-# 3. Clone this config
-git clone https://github.com/medeirosvictor/nvim.git ~/.config/nvim
+pip install ruff debugpy
 
 # 4. Open Neovim — lazy.nvim installs all plugins automatically on first launch
 nvim
@@ -66,7 +63,7 @@ echo 'export PATH="$PATH:/opt/nvim/bin"' >> ~/.bashrc && source ~/.bashrc
 # 2. Install dependencies
 sudo apt install -y git ripgrep fd-find build-essential nodejs npm python3 python3-pip
 npm install -g vtsls prettier eslint_d
-pip install basedpyright ruff debugpy
+pip install ruff debugpy
 # stylua: download from https://github.com/JohnnyMorganz/StyLua/releases
 # lazygit: https://github.com/jesseduffield/lazygit#ubuntu
 
@@ -86,7 +83,7 @@ winget install Neovim.Neovim
 # 2. Install dependencies
 winget install BurntSushi.ripgrep.MSVC sharkdp.fd jesseduffield.lazygit
 npm install -g vtsls prettier eslint_d
-pip install basedpyright ruff debugpy
+pip install ruff debugpy
 
 # 3. Clone this config (PowerShell)
 git clone https://github.com/medeirosvictor/nvim.git "$env:LOCALAPPDATA\nvim"
@@ -109,7 +106,7 @@ nvim
 3. Run `:checkhealth victor` to verify all external tools are present.
 
 4. Install LSP servers via Mason: `:Mason` → browse and press `i` to install.  
-   The config auto-enables: `vtsls`, `basedpyright`, `gopls`, `clangd`, `rust_analyzer`, `svelte`.
+   The config auto-enables: `vtsls`, `gopls`, `clangd`, `rust_analyzer`, `svelte`.
 
 5. Install treesitter parsers: `:TSUpdate` (most install automatically on first file open).
 
@@ -152,7 +149,9 @@ nvim/
 |---|---|
 | **nvim-tree.lua** | File explorer sidebar |
 | **telescope.nvim** | Fuzzy finder (files, grep, buffers, help) |
+| **project.nvim** | Project switcher — detects projects by root markers (`<leader>fp`) |
 | **lualine.nvim** | Status line |
+| **bufferline.nvim** | Buffer tab bar with pinning and close commands |
 | **which-key.nvim** | Keybinding popup helper |
 | **toggleterm.nvim** | Floating terminal |
 | **auto-session** | Automatic session save/restore |
@@ -163,7 +162,7 @@ nvim/
 ### LSP & Completion
 | Plugin | Purpose |
 |---|---|
-| **nvim-lspconfig** | LSP client (vtsls, basedpyright, gopls, clangd, rust_analyzer, svelte) |
+| **nvim-lspconfig** | LSP client (vtsls, gopls, clangd, rust_analyzer, svelte) |
 | **blink.cmp** | Rust-powered completion (replaces nvim-cmp) |
 | **LuaSnip** | Snippet engine |
 | **mason.nvim** | LSP / linter / formatter installer (`:Mason`) |
@@ -234,7 +233,7 @@ Neovim 0.11+ native commenting: `gc{motion}` / `gcc` toggle line, `<C-/>` shortc
 | Shortcut | Action |
 |---|---|
 | `<C-p>` | Find files (Telescope) |
-| `<C-f>` / `<C-S-F>` | Live grep (Telescope) |
+| `<C-f>` / `<C-F>` | Live grep (Telescope) |
 | `<C-b>` | Toggle file tree |
 | `<C-t>` | Toggle floating terminal |
 | `<C-/>` | Toggle comment (line / selection) |
@@ -249,7 +248,19 @@ Neovim 0.11+ native commenting: `gc{motion}` / `gcc` toggle line, `<C-/>` shortc
 | `<leader>fg` | Live grep |
 | `<leader>fb` | Find open buffers |
 | `<leader>fh` | Find help tags |
+| `<leader>fp` | Switch project (project.nvim) |
 | `<leader>th` | Pick colorscheme (Telescope) |
+
+### Buffers (bufferline)
+| Shortcut | Action |
+|---|---|
+| `<S-l>` | Next buffer |
+| `<S-h>` | Prev buffer |
+| `<leader>bp` | Pin / unpin buffer |
+| `<leader>bx` | Pick buffer to close |
+| `<leader>q` | Close current buffer |
+| `<leader>bo` | Close other buffers |
+| `<leader>ba` | Close all buffers |
 
 ### File Tree
 | Shortcut | Action |
