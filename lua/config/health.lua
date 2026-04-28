@@ -1,7 +1,7 @@
 local M = {}
 
 M.check = function()
-  vim.health.start("victor.health")
+  vim.health.start("config.health")
 
   -- Neovim version
   if vim.fn.has("nvim-0.11") == 1 then
