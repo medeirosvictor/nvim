@@ -11,6 +11,7 @@ return {
         html       = { "prettier" },
         css        = { "prettier" },
         json       = { "prettier" },
+        graphql    = { "prettier" },
         go         = { "gofmt" },
         rust       = { "rustfmt" },
         python     = { "ruff_format" },
