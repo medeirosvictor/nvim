@@ -1,7 +1,8 @@
 local keymap = vim.keymap.set
 
-keymap("n", "<C-f>", ":lua require('telescope.builtin').live_grep()<CR>", { noremap = true, silent = true, desc = "Find text in files" })
-keymap("n", "<C-F>", ":lua require('telescope.builtin').live_grep()<CR>", { noremap = true, silent = true, desc = "Find text in files" })
+-- <C-f> is now handled by grug-far (see plugins/grug-far.lua)
+-- <C-S-f> opens Telescope live_grep (press <C-q> inside to send results to Trouble grouped by file)
+keymap("n", "<C-S-f>", ":lua require('telescope.builtin').live_grep()<CR>", { noremap = true, silent = true, desc = "Telescope live grep" })
 keymap("n", "<C-p>", ":lua require('telescope.builtin').find_files()<CR>", { noremap = true, silent = true, desc = "Find files" })
 keymap("n", "<C-b>", ":NvimTreeToggle<CR>", { noremap = true, silent = true, desc = "Toggle sidebar" })
 keymap("n", "<C-t>", ":ToggleTerm direction=float<CR>", { noremap = true, silent = true, desc = "Toggle terminal" })

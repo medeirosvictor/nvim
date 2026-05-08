@@ -31,6 +31,8 @@ return {
         vim.keymap.set("n", "gr", vim.lsp.buf.references,     { buffer = buf, desc = "Go to references" })
         vim.keymap.set("n", "gD", vim.lsp.buf.declaration,    { buffer = buf, desc = "Go to declaration" })
         vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { buffer = buf, desc = "Go to implementation" })
+        vim.keymap.set("i", "<C-k>", vim.lsp.buf.signature_help, { buffer = buf, desc = "Signature help" })
+        vim.keymap.set("n", "gK",  vim.lsp.buf.signature_help, { buffer = buf, desc = "Signature help" })
         -- <leader>rn → inc-rename.nvim (global keymap, live preview)
         -- <leader>ca → actions-preview.nvim (global keymap, shows diff before apply)
       end,

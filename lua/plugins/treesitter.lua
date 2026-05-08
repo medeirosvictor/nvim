@@ -3,6 +3,12 @@ return {
   build = ":TSUpdate",
   dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
   config = function()
+    -- Add nvim-treesitter's runtime dir to rtp so highlight queries are found
+    local ts_runtime = vim.fn.stdpath("data") .. "/lazy/nvim-treesitter/runtime"
+    if vim.uv.fs_stat(ts_runtime) then
+      vim.opt.rtp:append(ts_runtime)
+    end
+
     require("nvim-treesitter").setup({
       ensure_installed = {
         "lua", "vim", "vimdoc",
