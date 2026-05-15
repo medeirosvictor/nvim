@@ -1,5 +1,4 @@
 {
-  "99": { "branch": "master", "commit": "0172d3caae2d8b967c9d47aa7557295f1481e5df" },
   "FixCursorHold.nvim": { "branch": "master", "commit": "1900f89dc17c603eec29960f57c00bd9ae696495" },
   "LuaSnip": { "branch": "master", "commit": "642b0c595e11608b4c18219e93b88d7637af27bc" },
   "actions-preview.nvim": { "branch": "master", "commit": "2b604b2e8e662c03b716436f6ffebcb19663e66a" },
@@ -11,6 +10,7 @@
   "catppuccin": { "branch": "main", "commit": "a7788416689dbefea659d9e9415c87926b0ba5d8" },
   "compile-mode.nvim": { "branch": "main", "commit": "5c79840a561242188999aaf82e54d91db60c818d" },
   "conform.nvim": { "branch": "master", "commit": "086a40dc7ed8242c03be9f47fbcee68699cc2395" },
+  "copilot.lua": { "branch": "master", "commit": "7e9c269bf40dea86b44e64bd746f1808e991e419" },
   "diffview.nvim": { "branch": "main", "commit": "4516612fe98ff56ae0415a259ff6361a89419b0a" },
   "gitsigns.nvim": { "branch": "main", "commit": "50c205548d8b037b7ff6378fca6d21146f0b6161" },
   "grug-far.nvim": { "branch": "main", "commit": "21790e59dd0109a92a70cb874dd002af186314f5" },
@@ -49,7 +49,6 @@
   "themery.nvim": { "branch": "main", "commit": "bfa58f4b279d21cb515b28023e1b68ec908584b2" },
   "toggleterm.nvim": { "branch": "main", "commit": "9a88eae817ef395952e08650b3283726786fb5fb" },
   "trouble.nvim": { "branch": "main", "commit": "bd67efe408d4816e25e8491cc5ad4088e708a69a" },
-  "v99": { "branch": "master", "commit": "d8bfbc5bf5bee9f056a5e95c7bf224e893093f0b" },
   "vim-visual-multi": { "branch": "master", "commit": "a6975e7c1ee157615bbc80fc25e4392f71c344d4" },
   "which-key.nvim": { "branch": "main", "commit": "3aab2147e74890957785941f0c1ad87d0a44c15a" }
 }

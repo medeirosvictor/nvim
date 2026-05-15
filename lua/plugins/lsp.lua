@@ -16,10 +16,25 @@ return {
       vim.lsp.enable(server)
     end
 
+    -- basedpyright: suppress noisy diagnostics that don't add value
+    vim.lsp.config("basedpyright", {
+      capabilities = capabilities,
+      settings = {
+        basedpyright = {
+          analysis = {
+            diagnosticSeverityOverrides = {
+              reportUnannotatedClassAttribute = "none",
+            },
+          },
+        },
+      },
+    })
+    vim.lsp.enable("basedpyright")
+
     vim.diagnostic.config({
       virtual_text = false,  -- disable inline text; use <leader>de or Trouble to see details
       signs        = true,
-      underline    = true,
+      underline    = false,
       float        = { border = "rounded" },
     })
 

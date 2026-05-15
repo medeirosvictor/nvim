@@ -1,24 +1,33 @@
+-- Copilot: AI code completion via ghost text
+-- Starts disabled; toggle with <leader>ct
 return {
-  "medeirosvictor/v99",
-  dependencies = { "ThePrimeagen/99" },
+  "zbirenbaum/copilot.lua",
+  cmd = "Copilot",
+  event = "InsertEnter",
   config = function()
-    local v99 = require("v99")
-
-    v99.setup({
-      -- provider = require("v99.providers.pi"),       -- pi with configured default
-      -- provider = require("v99.providers.opencode"),  -- opencode with configured default
-      -- provider = require("v99.providers.claude"),    -- claude (needs Max/API key)
-      -- Switch at runtime with <leader>9c
-      completion = {
-        source = "native",
+    require("copilot").setup({
+      suggestion = {
+        enabled = true,
+        auto_trigger = false, -- manual toggle; no unsolicited suggestions
+        keymap = {
+          accept = "<M-l>",
+          next = "<M-]>",
+          prev = "<M-[>",
+          dismiss = "<M-h>",
+        },
+      },
+      panel = { enabled = false }, -- use blink.cmp instead
+      filetypes = {
+        markdown = true,
+        yaml = true,
+        ["."] = false,
       },
     })
 
-    vim.keymap.set("v", "<leader>9v", function() v99.api.visual() end)
-    vim.keymap.set("n", "<leader>9x", function() v99.api.stop_all_requests() end)
-    vim.keymap.set("n", "<leader>9s", function() v99.api.search() end)
-    vim.keymap.set("n", "<leader>9c", function()
-      require("99.extensions.telescope").select_provider()
-    end, { desc = "Switch AI provider" })
+    vim.keymap.set("n", "<leader>ct", function()
+      require("copilot.suggestion").toggle_auto_trigger()
+      local enabled = vim.b.copilot_suggestion_auto_trigger
+      vim.notify("Copilot: " .. (enabled and "ON" or "OFF"))
+    end, { desc = "Toggle Copilot" })
   end,
 }

@@ -44,6 +44,4 @@ opt.foldlevel = 99
 opt.foldlevelstart = 99
 opt.foldenable = true
 
--- Whitespace visibility
-opt.list = true
-opt.listchars = { space = "·", tab = "→ ", trail = "·" }
+opt.list = false

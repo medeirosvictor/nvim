@@ -12,7 +12,7 @@ return {
       },
       filters = { custom = { "^.git$" } },
       git = { enable = true, ignore = true },
-      view = { width = 30, side = "left", signcolumn = "yes" },
+      view = { width = 30, side = "right", signcolumn = "yes" },
       renderer = {
         indent_width = 2,
         symlink_destination = false,
