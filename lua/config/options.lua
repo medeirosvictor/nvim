@@ -1,7 +1,7 @@
 local opt = vim.opt
 local g = vim.g
 
-opt.relativenumber = false
+opt.relativenumber = true
 opt.number = true
 
 opt.tabstop = 2
@@ -38,8 +38,11 @@ g.mapleader = " "
 
 opt.clipboard = "unnamedplus"
 
+-- Disable matchparen highlight (rainbow colors from treesitter are enough)
+vim.g.loaded_matchparen = 1
+
 -- Folding (managed by nvim-ufo)
-opt.foldcolumn = "1"
+opt.foldcolumn = "0"
 opt.foldlevel = 99
 opt.foldlevelstart = 99
 opt.foldenable = true

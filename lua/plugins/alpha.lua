@@ -31,13 +31,5 @@ return {
     dashboard.section.footer.val = "Neovim"
 
     alpha.setup(dashboard.opts)
-
-    -- Don't open NvimTree on dashboard
-    vim.api.nvim_create_autocmd("User", {
-      pattern = "AlphaReady",
-      callback = function()
-        vim.cmd("NvimTreeClose")
-      end,
-    })
   end,
 }

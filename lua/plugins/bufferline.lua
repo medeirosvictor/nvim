@@ -12,9 +12,7 @@ return {
         modified_icon     = "●",
         show_close_icon   = false,
         show_buffer_close_icons = true,
-        offsets = {
-          { filetype = "NvimTree", text = "EXPLORER", highlight = "Directory", separator = true },
-        },
+        offsets = {},
       },
     })
     vim.keymap.set("n", "<S-l>", "<cmd>BufferLineCycleNext<CR>", { desc = "Next buffer tab" })
@@ -22,7 +20,7 @@ return {
     vim.keymap.set("n", "<leader>bp", "<cmd>BufferLineTogglePin<CR>", { desc = "Pin/unpin buffer" })
     vim.keymap.set("n", "<leader>bx", "<cmd>BufferLinePickClose<CR>", { desc = "Pick buffer to close" })
     vim.keymap.set("n", "<leader>q", "<cmd>bd<CR>", { desc = "Close current buffer" })
-    vim.keymap.set("n", "<leader>ba", "<cmd>%bd|e#|bd#|NvimTreeOpen<CR>", { desc = "Close all buffers" })
+    vim.keymap.set("n", "<leader>ba", "<cmd>%bd|e#|bd#<CR>", { desc = "Close all buffers" })
     vim.keymap.set("n", "<leader>bo", "<cmd>BufferLineCloseOthers<CR>", { desc = "Close other buffers" })
   end,
 }

@@ -4,16 +4,9 @@ local keymap = vim.keymap.set
 -- <C-S-f> opens Telescope live_grep (press <C-q> inside to send results to Trouble grouped by file)
 keymap("n", "<C-S-f>", ":lua require('telescope.builtin').live_grep()<CR>", { noremap = true, silent = true, desc = "Telescope live grep" })
 keymap("n", "<C-p>", ":lua require('telescope.builtin').find_files()<CR>", { noremap = true, silent = true, desc = "Find files" })
-keymap("n", "<C-b>", ":NvimTreeToggle<CR>", { noremap = true, silent = true, desc = "Toggle sidebar" })
 keymap("n", "<C-t>", ":ToggleTerm direction=float<CR>", { noremap = true, silent = true, desc = "Toggle terminal" })
 
 keymap("n", "<leader>h", ":nohlsearch<CR>", { noremap = true, silent = true, desc = "Clear search highlight" })
-
--- j/k jump 5 lines (arrow keys stay single line)
-keymap("n", "j", "5j", { noremap = true, silent = true, desc = "Jump 5 lines down" })
-keymap("n", "k", "5k", { noremap = true, silent = true, desc = "Jump 5 lines up" })
-keymap("v", "j", "5j", { noremap = true, silent = true, desc = "Jump 5 lines down" })
-keymap("v", "k", "5k", { noremap = true, silent = true, desc = "Jump 5 lines up" })
 
 keymap("n", "<leader>ff", ":lua require('telescope.builtin').find_files()<CR>", { noremap = true, silent = true, desc = "Find files" })
 keymap("n", "<leader>fg", ":lua require('telescope.builtin').live_grep()<CR>", { noremap = true, silent = true, desc = "Find text in files" })
@@ -36,7 +29,7 @@ keymap("n", "<leader>tx", ":tabclose<CR>", { noremap = true, silent = true, desc
 keymap("n", "<leader>tn", ":tabnext<CR>", { noremap = true, silent = true, desc = "Next tab" })
 keymap("n", "<leader>tp", ":tabprevious<CR>", { noremap = true, silent = true, desc = "Previous tab" })
 
-keymap("n", "<leader>e", ":NvimTreeFocus<CR>", { noremap = true, silent = true, desc = "Focus file tree" })
+keymap("n", "<leader>e", ":Telescope find_files<CR>", { noremap = true, silent = true, desc = "Find files" })
 
 local harpoon = require("harpoon")
 keymap("n", "<leader>a", function() harpoon:list():add() end, { noremap = true, silent = true, desc = "Add file to harpoon" })

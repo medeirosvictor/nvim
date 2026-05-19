@@ -19,7 +19,6 @@ return {
       callback = function()
         vim.cmd("%bd")
         vim.cmd("SessionRestore")
-        vim.cmd("NvimTreeOpen")
       end,
     })
 
