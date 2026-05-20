@@ -1,19 +1,20 @@
 return {
   "nvim-telescope/telescope.nvim",
-  dependencies = { "nvim-lua/plenary.nvim" },
+  dependencies = {
+    "nvim-lua/plenary.nvim",
+    { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+  },
   config = function()
     local actions = require("telescope.actions")
     local trouble_sources = require("trouble.sources.telescope")
 
     require("telescope").setup({
       defaults = {
+        -- fd respects .gitignore natively, so node_modules etc. are never scanned.
+        -- file_ignore_patterns is a last-resort lua filter for anything not gitignored.
         file_ignore_patterns = {
-          "node_modules", "dist", "build", ".venv",
-          "%.lock$", "lock%.json$",
           "%.git/",
-          "__pycache__", "%.pyc$",
-          "%.class$", "%.jar$",
-          "coverage/", "%.cache",
+          "%.cache",
         },
         layout_strategy = "horizontal",
         layout_config = {
@@ -33,17 +34,19 @@ return {
       },
       pickers = {
         find_files = {
-          hidden = true,
-          no_ignore = true,
-          no_ignore_parent = true,
+          -- fd uses .gitignore by default — no_ignore removed intentionally
+          find_command = { "fd", "--type", "f", "--hidden", "--strip-cwd-prefix" },
           path_display = { "truncate" },
         },
         live_grep = {
+          -- rg uses .gitignore by default — --no-ignore removed intentionally
           additional_args = function()
-            return { "--hidden", "--no-ignore", "--no-ignore-parent", "--fixed-strings" }
+            return { "--hidden", "--fixed-strings" }
           end,
         },
       },
     })
+
+    require("telescope").load_extension("fzf")
   end,
 }

@@ -2,15 +2,14 @@ local keymap = vim.keymap.set
 
 -- <C-f> is now handled by grug-far (see plugins/grug-far.lua)
 -- <C-S-f> opens Telescope live_grep (press <C-q> inside to send results to Trouble grouped by file)
-keymap("n", "<C-S-f>", ":lua require('telescope.builtin').live_grep()<CR>", { noremap = true, silent = true, desc = "Telescope live grep" })
-keymap("n", "<C-p>", ":lua require('telescope.builtin').find_files()<CR>", { noremap = true, silent = true, desc = "Find files" })
+keymap("n", "<C-S-f>", function() require('telescope.builtin').live_grep({ cwd = vim.fn.getcwd(-1, -1) }) end, { noremap = true, silent = true, desc = "Telescope live grep" })
+keymap("n", "<C-p>", function() require('telescope.builtin').find_files({ cwd = vim.fn.getcwd(-1, -1) }) end, { noremap = true, silent = true, desc = "Find files" })
 keymap("n", "<C-t>", ":ToggleTerm direction=float<CR>", { noremap = true, silent = true, desc = "Toggle terminal" })
 
 keymap("n", "<leader>h", ":nohlsearch<CR>", { noremap = true, silent = true, desc = "Clear search highlight" })
 
-keymap("n", "<leader>ff", ":lua require('telescope.builtin').find_files()<CR>", { noremap = true, silent = true, desc = "Find files" })
-keymap("n", "<leader>fg", ":lua require('telescope.builtin').live_grep()<CR>", { noremap = true, silent = true, desc = "Find text in files" })
-keymap("n", "<leader>fG", ":lua require('telescope.builtin').live_grep()<CR>", { noremap = true, silent = true, desc = "Find text in files" })
+keymap("n", "<leader>ff", function() require('telescope.builtin').find_files({ cwd = vim.fn.getcwd(-1, -1) }) end, { noremap = true, silent = true, desc = "Find files" })
+keymap("n", "<leader>fg", function() require('telescope.builtin').live_grep({ cwd = vim.fn.getcwd(-1, -1) }) end, { noremap = true, silent = true, desc = "Find text in files" })
 keymap("n", "<leader>fb", ":lua require('telescope.builtin').buffers()<CR>", { noremap = true, silent = true, desc = "Find buffers" })
 keymap("n", "<leader>fh", ":lua require('telescope.builtin').help_tags()<CR>", { noremap = true, silent = true, desc = "Find help tags" })
 
@@ -29,7 +28,7 @@ keymap("n", "<leader>tx", ":tabclose<CR>", { noremap = true, silent = true, desc
 keymap("n", "<leader>tn", ":tabnext<CR>", { noremap = true, silent = true, desc = "Next tab" })
 keymap("n", "<leader>tp", ":tabprevious<CR>", { noremap = true, silent = true, desc = "Previous tab" })
 
-keymap("n", "<leader>e", ":Telescope find_files<CR>", { noremap = true, silent = true, desc = "Find files" })
+keymap("n", "<leader>e", function() require('telescope.builtin').find_files({ cwd = vim.fn.getcwd(-1, -1) }) end, { noremap = true, silent = true, desc = "Find files" })
 
 local harpoon = require("harpoon")
 keymap("n", "<leader>a", function() harpoon:list():add() end, { noremap = true, silent = true, desc = "Add file to harpoon" })
@@ -40,6 +39,10 @@ keymap("n", "<leader>h3", function() harpoon:list():select(3) end, { noremap = t
 keymap("n", "<leader>h4", function() harpoon:list():select(4) end, { noremap = true, silent = true, desc = "Harpoon 4" })
 
 keymap("x", "<leader>r", '"zy:%s/\\V<C-r>z//g<left><left>', { noremap = true, silent = false, desc = "Replace all in buffer (visual selection)" })
+
+-- File operations
+keymap("n", "<leader>q", "<cmd>bd<CR>", { noremap = true, silent = true, desc = "Close current buffer" })
+keymap("n", "<leader>fd", ":call delete(expand('%')) | bd<CR>", { noremap = true, silent = true, desc = "Delete current file" })
 
 -- Diagnostics
 keymap("n", "<leader>de", vim.diagnostic.open_float, { noremap = true, silent = true, desc = "Show full diagnostic" })

@@ -8,29 +8,26 @@ A modern Neovim setup (0.11+) using [lazy.nvim](https://github.com/folke/lazy.nv
 
 | Dependency | Purpose |
 |---|---|
-| **Neovim 0.11+** | Required. Grab the latest from [GitHub releases](https://github.com/neovim/neovim/releases) — distro packages are often too old. |
+| **Neovim 0.11+** | Required — grab from [GitHub releases](https://github.com/neovim/neovim/releases), distro packages are often too old |
 | **git** | Plugin management (lazy.nvim) |
-| **C compiler** (gcc/clang) | Treesitter parser compilation |
-| **tree-sitter CLI** | `brew install tree-sitter` or `npm i -g tree-sitter-cli` |
+| **C compiler** (gcc/clang) | Treesitter parser compilation + telescope-fzf-native |
 | **A Nerd Font** | Icons — [nerdfonts.com](https://www.nerdfonts.com/) |
 
-### Tools for full LSP / lint / format / debug support
-
-Run `:checkhealth victor` after first launch to see what's missing.
+### External tools (LSP, lint, format, search, debug)
 
 | Tool | Purpose |
 |---|---|
-| `node` + `npm` | vtsls (TypeScript), svelte LSPs |
-| `python3` + `pip` | debugpy (DAP), neotest-python |
+| `node` + `npm` | vtsls (TypeScript), svelte LSP |
+| `python3` + `pip` | debugpy (DAP) |
 | `go` | gopls |
 | `cargo` | rust-analyzer |
 | `ruff` | Python linter + formatter (`pip install ruff`) |
 | `eslint_d` | TypeScript/JS linter daemon (`npm i -g eslint_d`) |
 | `prettier` | TS/JS/CSS/JSON formatter (`npm i -g prettier`) |
-| `stylua` | Lua formatter (`brew install stylua` or via cargo) |
-| `lazygit` | Git TUI via snacks.lazygit (`brew install lazygit`) |
-| `ripgrep` (`rg`) | Telescope live grep |
-| `fd` | Faster Telescope file finding |
+| `stylua` | Lua formatter (`brew install stylua`) |
+| `lazygit` | Git TUI (`brew install lazygit`) |
+| `ripgrep` (`rg`) | Telescope live grep (`brew install ripgrep`) |
+| `fd` | Fast file finder for Telescope (`brew install fd`) |
 
 ---
 
@@ -42,73 +39,48 @@ Run `:checkhealth victor` after first launch to see what's missing.
 # 1. Install Neovim 0.11+
 brew install neovim
 
-# 2. Install dependencies
-brew install git ripgrep fd lazygit stylua tree-sitter
-npm install -g typescript-language-server vtsls prettier eslint_d
+# 2. Install external tools
+brew install git ripgrep fd lazygit stylua
+npm install -g vtsls prettier eslint_d
 pip install ruff debugpy
 
-# 4. Open Neovim — lazy.nvim installs all plugins automatically on first launch
+# 3. Clone config
+git clone https://github.com/medeirosvictor/nvim.git ~/.config/nvim
+
+# 4. Open Neovim — lazy.nvim installs all plugins automatically
 nvim
 ```
 
 ### Linux (Debian/Ubuntu)
 
 ```bash
-# 1. Install Neovim 0.11+ (distro package is likely outdated — use the AppImage or tarball)
+# 1. Install Neovim 0.11+ (distro package is often outdated — use tarball)
 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
-tar xzf nvim-linux-x86_64.tar.gz
-sudo mv nvim-linux-x86_64 /opt/nvim
+tar xzf nvim-linux-x86_64.tar.gz && sudo mv nvim-linux-x86_64 /opt/nvim
 echo 'export PATH="$PATH:/opt/nvim/bin"' >> ~/.bashrc && source ~/.bashrc
 
-# 2. Install dependencies
+# 2. Install external tools
 sudo apt install -y git ripgrep fd-find build-essential nodejs npm python3 python3-pip
 npm install -g vtsls prettier eslint_d
 pip install ruff debugpy
-# stylua: download from https://github.com/JohnnyMorganz/StyLua/releases
 # lazygit: https://github.com/jesseduffield/lazygit#ubuntu
+# stylua: https://github.com/JohnnyMorganz/StyLua/releases
 
-# 3. Clone this config
+# 3. Clone config
 git clone https://github.com/medeirosvictor/nvim.git ~/.config/nvim
 
 # 4. Open Neovim
 nvim
 ```
 
-### Windows (PowerShell + winget)
-
-```powershell
-# 1. Install Neovim
-winget install Neovim.Neovim
-
-# 2. Install dependencies
-winget install BurntSushi.ripgrep.MSVC sharkdp.fd jesseduffield.lazygit
-npm install -g vtsls prettier eslint_d
-pip install ruff debugpy
-
-# 3. Clone this config (PowerShell)
-git clone https://github.com/medeirosvictor/nvim.git "$env:LOCALAPPDATA\nvim"
-
-# 4. Open Neovim
-nvim
-```
-
-> **Note for Windows:** A C compiler is needed for treesitter. Install Visual Studio Build Tools or LLVM (`winget install LLVM.LLVM`).
-
 ---
 
 ## First Launch
 
-1. On first open, lazy.nvim automatically clones and installs all plugins.  
-   This takes ~30–60 seconds — you'll see a progress UI.
-
-2. Some plugins have build steps (blink.cmp, LuaSnip). If they fail, run `:Lazy build blink.cmp` / `:Lazy build LuaSnip`.
-
-3. Run `:checkhealth victor` to verify all external tools are present.
-
-4. Install LSP servers via Mason: `:Mason` → browse and press `i` to install.  
-   The config auto-enables: `vtsls`, `gopls`, `clangd`, `rust_analyzer`, `svelte`.
-
-5. Install treesitter parsers: `:TSUpdate` (most install automatically on first file open).
+1. lazy.nvim bootstraps itself and installs all plugins (~30–60 seconds). A progress UI shows the status.
+2. Mason auto-installs the LSP servers (`vtsls`, `gopls`, `rust_analyzer`, `svelte`). Run `:Mason` to manage others manually.
+3. Treesitter parsers auto-install on first file open (`auto_install = true`).
+4. If any plugin build step fails (blink.cmp, LuaSnip, telescope-fzf-native), run `:Lazy build <plugin-name>`.
 
 ---
 
@@ -116,246 +88,170 @@ nvim
 
 ```
 nvim/
-├── init.lua                    # Entry point — all plugin specs and config
-├── lua/victor/
-│   ├── core/
-│   │   ├── options.lua         # Editor settings (tabs, clipboard, colors, folds)
-│   │   ├── keymaps.lua         # Global keyboard shortcuts
-│   │   └── autocmds.lua        # Autocommands (yank highlight, indent, etc.)
-│   └── health/
-│       └── init.lua            # :checkhealth victor — dependency checker
-├── lazy-lock.json              # Plugin version lockfile (commit this)
-└── README.md
+├── init.lua                  # Entry point — bootstraps lazy.nvim, loads plugins
+├── lazy-lock.json            # Plugin version lockfile (commit this)
+├── README.md
+└── lua/
+    ├── config/
+    │   ├── options.lua       # Editor settings (tabs, clipboard, folding, etc.)
+    │   ├── keymaps.lua       # Global keybindings
+    │   └── autocmds.lua      # Autocommands (yank highlight, etc.)
+    └── plugins/              # One file per plugin (or logical group)
 ```
-
-### Where to make changes
-
-| What | Where |
-|---|---|
-| Add/remove plugins | `init.lua` — find the relevant `-- ─── Section` block |
-| Global keybindings | `lua/victor/core/keymaps.lua` |
-| Editor settings | `lua/victor/core/options.lua` |
-| LSP servers | `init.lua` — find `local servers = { ... }` |
-| Treesitter languages | `init.lua` — find `ensure_installed = { ... }` |
-| Lint tools per filetype | `init.lua` — find `lint.linters_by_ft` |
-| Format tools per filetype | `init.lua` — find `formatters_by_ft` |
 
 ---
 
 ## Plugins
 
-### Core
+### Navigation & Search
 | Plugin | Purpose |
 |---|---|
-| **nvim-tree.lua** | File explorer sidebar |
-| **telescope.nvim** | Fuzzy finder (files, grep, buffers, help) |
-| **project.nvim** | Project switcher — detects projects by root markers (`<leader>fp`) |
-| **lualine.nvim** | Status line |
-| **bufferline.nvim** | Buffer tab bar with pinning and close commands |
-| **which-key.nvim** | Keybinding popup helper |
-| **toggleterm.nvim** | Floating terminal |
-| **auto-session** | Automatic session save/restore |
-| **harpoon** (v2) | Quick file marking and navigation |
-| **vim-visual-multi** | Multiple cursors |
-| **nvim-ufo** | Better code folding (LSP + indent) |
+| **telescope.nvim** + **telescope-fzf-native** | Fuzzy finder — files, grep, buffers, help. fzf-native adds a native C sorter for fast matching |
+| **harpoon** (v2) | Quick-mark up to 4 files and jump between them instantly |
+| **grug-far.nvim** | Project-wide search & replace with live preview |
 
 ### LSP & Completion
 | Plugin | Purpose |
 |---|---|
-| **nvim-lspconfig** | LSP client (vtsls, gopls, clangd, rust_analyzer, svelte) |
-| **blink.cmp** | Rust-powered completion (replaces nvim-cmp) |
-| **LuaSnip** | Snippet engine |
-| **mason.nvim** | LSP / linter / formatter installer (`:Mason`) |
-| **mason-lspconfig.nvim** | Bridge between Mason and lspconfig |
-| **inc-rename.nvim** | Live-preview rename |
+| **nvim-lspconfig** | LSP client — vtsls, gopls, clangd, rust_analyzer, svelte, basedpyright |
+| **blink.cmp** | Rust-powered completion (LSP, path, snippets, buffer words) |
+| **LuaSnip** | Snippet engine (used by blink.cmp) |
+| **mason.nvim** + **mason-lspconfig** | Install/manage LSP servers, linters, formatters (`:Mason`) |
+| **inc-rename.nvim** | Live-preview symbol rename |
 | **actions-preview.nvim** | Diff-preview before applying code actions |
 
 ### Treesitter
 | Plugin | Purpose |
 |---|---|
-| **nvim-treesitter** | Syntax highlighting, indentation |
+| **nvim-treesitter** | Syntax highlighting, indentation — auto-installs parsers |
 | **nvim-treesitter-textobjects** | `af/if` (function), `ac/ic` (class), `aa/ia` (argument) text objects |
 
 ### Git
 | Plugin | Purpose |
 |---|---|
-| **gitsigns.nvim** | Git signs in gutter, hunk staging/reset |
-| **diffview.nvim** | Side-by-side diff view and file history |
+| **gitsigns.nvim** | Gutter signs, hunk staging/reset, hunk navigation |
 | **snacks.lazygit** | Lazygit in a managed float |
 
 ### Linting & Formatting
-| Plugin | Linters/Formatters |
+| Plugin | Tools |
 |---|---|
-| **nvim-lint** | `ruff` (Python), `eslint_d` (TS/JS/Svelte) |
-| **conform.nvim** | `ruff_format` (Python), `prettier` (TS/JS/CSS/JSON), `gofmt`, `rustfmt`, `stylua` |
+| **nvim-lint** | `ruff` (Python), `eslint_d` (TS/JS/Svelte) — runs on save and insert leave |
+| **conform.nvim** | `ruff_format` (Python), `prettier` (TS/JS/CSS/JSON/Svelte), `gofmt`, `rustfmt`, `stylua` — formats on save |
 
 ### Debugging
 | Plugin | Purpose |
 |---|---|
-| **nvim-dap** | Debug Adapter Protocol client |
-| **nvim-dap-ui** | Debugger UI (variables, callstack, breakpoints panels) |
-| **nvim-dap-virtual-text** | Inline variable values while debugging |
+| **nvim-dap** + **nvim-dap-ui** + **nvim-dap-virtual-text** | Debug Adapter Protocol — breakpoints, step through, variable inspection |
 | **nvim-dap-python** | Python debugpy adapter (supports remote attach for Docker/Okteto) |
 
-### Testing
+### UI & QoL
 | Plugin | Purpose |
 |---|---|
-| **neotest** | Test runner framework |
-| **neotest-python** | pytest adapter |
-| **neotest-vitest** | Vitest adapter |
+| **lualine.nvim** | Status line |
+| **aerial.nvim** | Symbol outline sidebar — navigate functions/classes with `{`/`}` |
+| **trouble.nvim** | Diagnostics and quickfix panel |
+| **nvim-ufo** | LSP-powered code folding |
+| **which-key.nvim** | Keymap popup after leader pause |
+| **toggleterm.nvim** | Floating terminal |
+| **snacks.nvim** | Notifications, indent guides, word highlights, bigfile guard |
+| **auto-session** | Automatic session save/restore per working directory |
 
-### QoL
+### Editing
 | Plugin | Purpose |
 |---|---|
-| **snacks.nvim** | Notifications, indent guides, word highlight, bigfile guard |
-| **trouble.nvim** | Diagnostics/quickfix panel |
-| **aerial.nvim** | Symbol outline sidebar (`{`/`}` to navigate) |
 | **nvim-surround** | Add/change/delete surrounding quotes, brackets, tags |
 | **nvim-autopairs** | Auto-close brackets and quotes |
-| **compile-mode.nvim** | Emacs-style compile buffer |
-
-### Themes
-Kanagawa Wave (default), Kanagawa Lotus, Terafox, Nordfox, Dayfox, Catppuccin Mocha, Catppuccin Latte.
-Switch with `<leader>ct` (Themery live preview).
+| **vim-visual-multi** | Multiple cursors |
 
 ### AI
-- **v99** — AI assistant (supports pi, opencode, claude providers; switch at runtime with `<leader>9c`)
-- **decent-notes** — Personal notes plugin (optional; loads only if `~/.decent-notes.lua` exists)
+| Plugin | Purpose |
+|---|---|
+| **decent-notes** | Personal notes panel — only loads if `~/.decent-notes.lua` exists |
+
+### Theme
+**Ayu Dark** (`neovim-ayu`). Switch at runtime with `<leader>th` (Telescope colorscheme picker).
 
 ---
 
 ## Keybindings
 
-`Space` is the **leader key**. Which-key shows available keys after a short pause.  
-Neovim 0.11+ native commenting: `gc{motion}` / `gcc` toggle line, `<C-/>` shortcut below.
+`Space` is the **leader key**. Which-key shows available keys after a short pause.
 
 ### Global
-| Shortcut | Action |
+| Key | Action |
 |---|---|
-| `<C-p>` | Find files (Telescope) |
-| `<C-f>` / `<C-F>` | Live grep (Telescope) |
-| `<C-b>` | Toggle file tree |
+| `<C-p>` | Find files (Telescope, searches from workspace root) |
+| `<C-S-f>` | Live grep (Telescope, searches from workspace root) |
+| `<C-f>` | Search & replace — grug-far (normal mode) |
+| `<C-f>` | Search & replace with selection pre-filled (visual mode) |
 | `<C-t>` | Toggle floating terminal |
-| `<C-/>` | Toggle comment (line / selection) |
+| `<C-/>` | Toggle comment (line or selection — native Neovim 0.11+) |
 | `<M-e>` | Autopairs fast-wrap |
-| `j` / `k` | Jump **5 lines** down/up (normal & visual) |
-| `↓` / `↑` | Jump 1 line (arrow keys) |
+| `<C-h/j/k/l>` | Move to window left/down/up/right |
+| `<C-n>` | Open Decent Notes (only if `~/.decent-notes.lua` exists) |
 
 ### Telescope / Search
-| Shortcut | Action |
+| Key | Action |
 |---|---|
-| `<leader>ff` | Find files |
+| `<leader>ff` / `<leader>e` | Find files |
 | `<leader>fg` | Live grep |
 | `<leader>fb` | Find open buffers |
 | `<leader>fh` | Find help tags |
-| `<leader>fp` | Switch project (project.nvim) |
-| `<leader>th` | Pick colorscheme (Telescope) |
+| `<leader>th` | Pick colorscheme |
 
-### Buffers (bufferline)
-| Shortcut | Action |
+### Harpoon
+| Key | Action |
 |---|---|
-| `<S-l>` | Next buffer |
-| `<S-h>` | Prev buffer |
-| `<leader>bp` | Pin / unpin buffer |
-| `<leader>bx` | Pick buffer to close |
+| `<leader>a` | Add current file to harpoon |
+| `<leader>hh` | Open harpoon menu |
+| `<leader>h1` – `<leader>h4` | Jump to harpoon mark 1–4 |
+
+### Buffers
+| Key | Action |
+|---|---|
 | `<leader>q` | Close current buffer |
-| `<leader>bo` | Close other buffers |
-| `<leader>ba` | Close all buffers |
 
-### File Tree
-| Shortcut | Action |
+### Windows & Tabs
+| Key | Action |
 |---|---|
-| `<leader>e` | Focus file tree |
-| `<C-b>` | Toggle file tree |
-
-### Window Navigation
-| Shortcut | Action |
-|---|---|
-| `<C-h/j/k/l>` | Move to window left/down/up/right |
-| `<leader>sv` | Split vertically |
-| `<leader>sh` | Split horizontally |
-
-### Tabs
-| Shortcut | Action |
-|---|---|
+| `<leader>sv` / `<leader>sh` | Split vertically / horizontally |
 | `<leader>to` | New tab |
 | `<leader>tx` | Close tab |
-| `<leader>tn` | Next tab |
-| `<leader>tp` | Previous tab |
-
-### Harpoon (quick file marks)
-| Shortcut | Action |
-|---|---|
-| `<leader>a` | Add file to harpoon |
-| `<leader>hh` | Open harpoon menu |
-| `<leader>h1`–`h4` | Jump to harpoon mark 1–4 |
+| `<leader>tn` / `<leader>tp` | Next / prev tab |
 
 ### LSP
-| Shortcut | Action |
+| Key | Action |
 |---|---|
 | `gd` | Go to definition |
 | `gD` | Go to declaration |
 | `gi` | Go to implementation |
 | `gr` | Go to references |
 | `K` | Hover documentation |
-| `<leader>rn` | Rename symbol (live preview via inc-rename) |
-| `<leader>ca` | Code action (diff preview via actions-preview) |
+| `gK` / `<C-k>` (insert) | Signature help |
+| `<leader>rn` | Rename symbol (live preview) |
+| `<leader>ca` | Code action (diff preview before apply) |
 | `<leader>de` | Show diagnostic float |
-
-### Surround (nvim-surround)
-| Shortcut | Action |
-|---|---|
-| `ys{motion}{char}` | Add surround — e.g. `ysiw"` wraps word with `""` |
-| `yss{char}` | Surround entire line |
-| `ds{char}` | Delete surround |
-| `cs{old}{new}` | Change surround — e.g. `cs"'` changes `""` to `''` |
-| `S{char}` | Surround visual selection |
-
-### Treesitter Text Objects
-| Shortcut | Action |
-|---|---|
-| `af` / `if` | Around / inside **function** |
-| `ac` / `ic` | Around / inside **class** |
-| `aa` / `ia` | Around / inside **argument** |
-| `]f` / `[f` | Jump to next / prev function start |
-| `]c` / `[c` | Jump to next / prev class start |
-
-### Git
-| Shortcut | Action |
-|---|---|
-| `]h` / `[h` | Next / prev hunk |
-| `<leader>ghs` | Stage hunk |
-| `<leader>ghr` | Reset hunk |
-| `<leader>gg` | Open Lazygit float |
-| `<leader>gl` | Lazygit log |
-| `<leader>gd` | Open diff view |
-| `<leader>gD` | Close diff view |
-| `<leader>gH` | File git history (diffview) |
 
 ### Diagnostics / Trouble
-| Shortcut | Action |
+| Key | Action |
 |---|---|
-| `<leader>de` | Show diagnostic float |
 | `<leader>xx` | Workspace diagnostics (Trouble) |
 | `<leader>xX` | Buffer diagnostics (Trouble) |
 | `<leader>xs` | Symbols (Trouble) |
 | `<leader>xq` | Quickfix list (Trouble) |
 | `<leader>xl` | Location list (Trouble) |
 
-### Symbol Outline (aerial)
-| Shortcut | Action |
+### Git
+| Key | Action |
 |---|---|
-| `<leader>ao` | Toggle symbol outline |
-| `{` / `}` | Prev / next symbol (per buffer) |
-
-### Folding (nvim-ufo)
-| Shortcut | Action |
-|---|---|
-| `zR` | Open all folds |
-| `zM` | Close all folds |
+| `]h` / `[h` | Next / prev hunk |
+| `<leader>ghs` | Stage hunk |
+| `<leader>ghr` | Reset hunk |
+| `<leader>gg` | Open Lazygit float |
+| `<leader>gl` | Lazygit log |
 
 ### Debugging (DAP)
-| Shortcut | Action |
+| Key | Action |
 |---|---|
 | `<leader>db` | Toggle breakpoint |
 | `<leader>dB` | Conditional breakpoint |
@@ -366,44 +262,40 @@ Neovim 0.11+ native commenting: `gc{motion}` / `gcc` toggle line, `<C-/>` shortc
 | `<leader>du` | Toggle DAP UI |
 | `<leader>dr` | Open REPL |
 
-> **Docker/Okteto remote debugging:** Configure a remote attach in `init.lua` under the DAP section.  
-> Example: `dap.configurations.python` with `{ request = "attach", host = "localhost", port = 5678 }`.
-
-### Testing (neotest)
-| Shortcut | Action |
+### Symbol Outline (aerial)
+| Key | Action |
 |---|---|
-| `<leader>tt` | Run nearest test |
-| `<leader>tf` | Run test file |
-| `<leader>ts` | Toggle test summary |
-| `<leader>tO` | Open test output |
-| `<leader>tP` | Toggle test output panel |
-| `<leader>td` | Debug nearest test (neotest + DAP) |
+| `<leader>ao` | Toggle symbol outline |
+| `{` / `}` | Prev / next symbol in file |
 
-### Compilation (compile-mode)
-| Shortcut | Action |
+### Folding (nvim-ufo)
+| Key | Action |
 |---|---|
-| `<leader>cc` | Compile |
-| `<leader>cr` | Recompile (repeat last) |
-| `<leader>ce` | Jump to next compile error |
-| `<leader>cE` | Jump to prev compile error |
+| `zR` | Open all folds |
+| `zM` | Close all folds |
 
-### Themes
-| Shortcut | Action |
+### Surround (nvim-surround)
+| Key | Action |
 |---|---|
-| `<leader>ct` | Open Themery (live preview theme switcher) |
-| `<leader>th` | Pick colorscheme via Telescope |
+| `ys{motion}{char}` | Add surround — e.g. `ysiw"` wraps word in `""` |
+| `yss{char}` | Surround entire line |
+| `ds{char}` | Delete surround |
+| `cs{old}{new}` | Change surround — e.g. `cs"'` |
+| `S{char}` | Surround visual selection |
 
-### AI (v99)
-| Shortcut | Action |
+### Treesitter Text Objects
+| Key | Action |
 |---|---|
-| `<leader>9v` | Visual selection to AI (visual mode) |
-| `<leader>9s` | AI search |
-| `<leader>9x` | Stop all AI requests |
-| `<leader>9c` | Switch AI provider (Telescope picker) |
+| `af` / `if` | Around / inside function |
+| `ac` / `ic` | Around / inside class |
+| `aa` / `ia` | Around / inside argument |
+| `]f` / `[f` | Jump to next / prev function |
+| `]c` / `[c` | Jump to next / prev class |
 
 ### Misc
-| Shortcut | Action |
+| Key | Action |
 |---|---|
+| `<leader>fd` | Delete current file |
 | `<leader>h` | Clear search highlight |
 | `<leader>r` (visual) | Replace all occurrences of selection in buffer |
 
@@ -419,17 +311,17 @@ return {
 }
 ```
 
-The plugin only loads when this file exists. `<C-n>` opens the notes panel.
+`<C-n>` opens the notes panel. The plugin does not load at all if this file is absent.
 
 ---
 
 ## Updating
 
 ```vim
-:Lazy update       " update all plugins
-:Lazy sync         " install missing + update + clean unused
-:TSUpdate          " update treesitter parsers
-:Mason             " manage LSP servers / linters / formatters
+:Lazy update        " update all plugins
+:Lazy sync          " install missing + update + clean unused
+:TSUpdate           " update treesitter parsers
+:Mason              " manage LSP servers / linters / formatters
 ```
 
-After updating, commit `lazy-lock.json` to pin plugin versions across machines.
+Commit `lazy-lock.json` after updating to pin plugin versions across machines.

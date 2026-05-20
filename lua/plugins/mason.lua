@@ -13,7 +13,7 @@ return {
       require("mason-lspconfig").setup({
         -- run :Mason to install these (automatic_installation = false keeps it opt-in)
         ensure_installed = { "vtsls", "gopls", "rust_analyzer", "svelte" },
-        automatic_installation = false,
+      automatic_installation = true,
       })
     end,
   },
