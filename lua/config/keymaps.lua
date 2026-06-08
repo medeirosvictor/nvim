@@ -37,6 +37,11 @@ keymap("n", "<leader>h1", function() harpoon:list():select(1) end, { noremap = t
 keymap("n", "<leader>h2", function() harpoon:list():select(2) end, { noremap = true, silent = true, desc = "Harpoon 2" })
 keymap("n", "<leader>h3", function() harpoon:list():select(3) end, { noremap = true, silent = true, desc = "Harpoon 3" })
 keymap("n", "<leader>h4", function() harpoon:list():select(4) end, { noremap = true, silent = true, desc = "Harpoon 4" })
+keymap("n", "<leader>h5", function() harpoon:list():select(5) end, { noremap = true, silent = true, desc = "Harpoon 5" })
+keymap("n", "<leader>h6", function() harpoon:list():select(6) end, { noremap = true, silent = true, desc = "Harpoon 6" })
+keymap("n", "<leader>h7", function() harpoon:list():select(7) end, { noremap = true, silent = true, desc = "Harpoon 7" })
+keymap("n", "<leader>h8", function() harpoon:list():select(8) end, { noremap = true, silent = true, desc = "Harpoon 8" })
+keymap("n", "<leader>h9", function() harpoon:list():select(9) end, { noremap = true, silent = true, desc = "Harpoon 9" })
 
 keymap("x", "<leader>r", '"zy:%s/\\V<C-r>z//g<left><left>', { noremap = true, silent = false, desc = "Replace all in buffer (visual selection)" })
 
@@ -50,3 +55,7 @@ keymap("n", "<leader>de", vim.diagnostic.open_float, { noremap = true, silent = 
 -- Folding (nvim-ufo)
 keymap("n", "zR", require("ufo").openAllFolds, { desc = "Open all folds" })
 keymap("n", "zM", require("ufo").closeAllFolds, { desc = "Close all folds" })
+
+-- Visual indent/dedent (stay in visual mode)
+keymap("v", ">", ">gv", { noremap = true, silent = true, desc = "Indent (visual)" })
+keymap("v", "<", "<gv", { noremap = true, silent = true, desc = "Dedent (visual)" })
