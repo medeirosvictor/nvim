@@ -12,6 +12,15 @@ keymap("n", "<leader>ff", function() require('telescope.builtin').find_files({ c
 keymap("n", "<leader>fg", function() require('telescope.builtin').live_grep({ cwd = vim.fn.getcwd(-1, -1) }) end, { noremap = true, silent = true, desc = "Find text in files" })
 keymap("n", "<leader>fb", ":lua require('telescope.builtin').buffers()<CR>", { noremap = true, silent = true, desc = "Find buffers" })
 keymap("n", "<leader>fh", ":lua require('telescope.builtin').help_tags()<CR>", { noremap = true, silent = true, desc = "Find help tags" })
+keymap("n", "<leader>gs", function()
+  local buf_dir = vim.fn.expand("%:p:h")
+  local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(buf_dir) .. " rev-parse --show-toplevel")[1]
+  if vim.v.shell_error ~= 0 then
+    vim.notify("Not in a git repo", vim.log.levels.WARN)
+    return
+  end
+  require('telescope.builtin').git_status({ cwd = git_root })
+end, { noremap = true, silent = true, desc = "Git changed files (buffer repo)" })
 
 keymap("n", "<leader>th", ":Telescope colorscheme<CR>", { noremap = true, silent = true, desc = "Pick theme" })
 
